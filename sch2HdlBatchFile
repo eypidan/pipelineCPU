@@ -1,0 +1,2 @@
+sch2hdl,-sympath,C:/Users/px/Downloads/OExp07_CPUMore/ipcore_dir,-intstyle,ise,-family,kintex7,-verilog,C:/Users/px/Downloads/OExp07_CPUMore/Data_path.vf,-w,C:/Users/px/Downloads/OExp07_CPUMore/Data_path.sch
+sch2hdl,-sympath,C:/Users/px/Downloads/OExp07_CPUMore/ipcore_dir,-intstyle,ise,-family,kintex7,-verilog,C:/Users/px/Downloads/OExp07_CPUMore/SCPU_More.vf,-w,C:/Users/px/Downloads/OExp07_CPUMore/SCPU_More.sch
