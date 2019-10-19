@@ -1,3 +1,9 @@
+*.bld
+*.pad
+*.par
+*.syr
+*.ptwx
+*.coe
 _ngo
 _xmsgs
 ipcore_dir

@@ -22,6 +22,7 @@ module clk_div(
 	input clk,
 	input rst,
 	input siwtch,   // CPUÊ±ÖÓÄ£Ê½ÇÐ»»
+	input handClk,
 	output reg [31:0] clkdiv,
 	output clk_cpu
    );
@@ -33,6 +34,6 @@ module clk_div(
 		else clkdiv <= clkdiv +1'b1;
 	end
 	
-	assign clk_cpu = siwtch ? clkdiv[24] : clkdiv[2];
+	assign clk_cpu = siwtch ? handClk : clkdiv[2];
 	
 endmodule

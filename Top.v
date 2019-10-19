@@ -95,13 +95,13 @@ module Top(
 	clkchange U0(
 		.clk200P(CLK_200M_P),
 		.clk200N(CLK_200M_N),
-		.rst(RSTN),
+		.rst(AntiJitter_SW_OK[14]),
 		.clk100MHz(clk_100mhz)
 	);
 	//U1
 	SCPU_More U1 (	
 		.clk(ClkDiv_CpuClk),			
-		.reset(AntiJitter_rst),
+		.reset(AntiJitter_SW_OK[14]),
 		.MIO_ready(),
 		.inst_in(Rom_CpuInst),
 		.Data_in(Bus_CpuData),
@@ -131,7 +131,7 @@ module Top(
 	//U4
 	MIO_BUS U4(
 		.clk(clk_100mhz),
-		.rst(AntiJitter_rst),
+		.rst(AntiJitter_SW_OK[14]),
 		.BTN(AntiJitter_BTN_OK[3:0]),
 		.SW(AntiJitter_SW_OK[15:0]),
 		.mem_w(Cpu_mem_w),
@@ -156,7 +156,7 @@ module Top(
 	//U5
 	Multi_8CH32 U5 (
 		.clk(~ClkDiv_CpuClk),
-		.rst(AntiJitter_rst),
+		.rst(AntiJitter_SW_OK[14]),
 		.EN(Bus_Mux_EN),
 		.Test(AntiJitter_SW_OK[7:5]),
 		.point_in({ClkDiv_Div, ClkDiv_Div}),
@@ -177,7 +177,7 @@ module Top(
 	//U6
 	SSeg7_Dev U6 (
 		.clk(clk_100mhz),//时钟
-		.rst(AntiJitter_rst),//复位
+		.rst(AntiJitter_SW_OK[14]),//复位
 		.Start(ClkDiv_Div[20]),//串行扫描启动
 		.Mode(AntiJitter_SW_OK[0]),//文本(16进制)/图型(点阵)切换
 		.flash(ClkDiv_Div[25]),//七段码闪烁频率
@@ -193,7 +193,7 @@ module Top(
 	//U7
 	SPIO U7 (
 		.clk(~ClkDiv_CpuClk),//时钟
-		.rst(AntiJitter_rst),//复位
+		.rst(AntiJitter_SW_OK[14]),//复位
 		.EN(Bus_SPIO_EN),//PIO/LED显示刷新使能
 		.Start(ClkDiv_Div[20]),//串行扫描启动
 		.P_Data(Bus_Peripheral_in),//并行输入，用于串行输出数据
@@ -209,8 +209,9 @@ module Top(
 	//U8
 	clk_div U8 (
 		.clk(clk_100mhz),//主板时钟
-	   .rst(AntiJitter_rst),//复位信号
+	   .rst(AntiJitter_SW_OK[14]),//复位信号
 	   .siwtch(AntiJitter_SW_OK[2]),//CPU时钟切换
+		.handClk(AntiJitter_SW_OK[15]),
 		.clkdiv(ClkDiv_Div),//32位计数分频输出
 		.clk_cpu(ClkDiv_CpuClk)//CPU时钟输出
 		);
@@ -235,7 +236,7 @@ module Top(
 	//U10
 	Counter_x U10 (
 		.clk(~ClkDiv_CpuClk),
-		.rst(AntiJitter_rst),
+		.rst(AntiJitter_SW_OK[14]),
 		.clk0(ClkDiv_Div[6]),
 		.clk1(ClkDiv_Div[9]),
 		.clk2(ClkDiv_Div[11]),

@@ -23,6 +23,6 @@ input wire [4:0]A,
 output wire [31:0]B
     );
 
-assign B = {{27{0}},{A[4:0]}};
+assign B = {27'b0,A[4:0]};
 
 endmodule

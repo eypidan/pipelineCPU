@@ -29,6 +29,10 @@ module REG32(
 	reg [31:0] register;
 	assign Q = register;
 	
+	initial begin
+		register = 0;
+	end
+	
 	always@(posedge clk or posedge rst)
 	begin
 		if(rst == 1)

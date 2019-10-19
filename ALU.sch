@@ -20,15 +20,19 @@
         <signal name="res(31:0)" />
         <signal name="S(32:0)" />
         <signal name="S(31:0)" />
-        <signal name="overflow" />
         <signal name="zero" />
         <signal name="XLXN_48(31:0)" />
+        <signal name="S(31)">
+        </signal>
+        <signal name="XLXN_51" />
+        <signal name="XLXN_52" />
+        <signal name="overflow" />
         <port polarity="Input" name="A(31:0)" />
         <port polarity="Input" name="B(31:0)" />
         <port polarity="Input" name="ALU_operation(2:0)" />
         <port polarity="Output" name="res(31:0)" />
-        <port polarity="Output" name="overflow" />
         <port polarity="Output" name="zero" />
+        <port polarity="Output" name="overflow" />
         <blockdef name="and32">
             <timestamp>2016-2-27T5:21:0</timestamp>
             <line x2="32" y1="-96" y2="-96" style="linewidth:W" x1="64" />
@@ -139,6 +143,12 @@
             <rect width="64" x="320" y="-108" height="24" />
             <line x2="384" y1="-96" y2="-96" x1="320" />
         </blockdef>
+        <blockdef name="convert">
+            <timestamp>2019-10-14T8:8:7</timestamp>
+            <rect width="256" x="64" y="-64" height="64" />
+            <line x2="0" y1="-32" y2="-32" x1="64" />
+            <line x2="384" y1="-32" y2="-32" x1="320" />
+        </blockdef>
         <block symbolname="and32" name="ALU_U1">
             <blockpin signalname="XLXN_24(31:0)" name="res(31:0)" />
             <blockpin signalname="A(31:0)" name="A(31:0)" />
@@ -199,6 +209,10 @@
             <blockpin signalname="A(31:0)" name="A(31:0)" />
             <blockpin signalname="B(31:0)" name="B(31:0)" />
             <blockpin signalname="XLXN_48(31:0)" name="res(31:0)" />
+        </block>
+        <block symbolname="convert" name="XLXI_13">
+            <blockpin signalname="S(31)" name="a" />
+            <blockpin signalname="overflow" name="b" />
         </block>
     </netlist>
     <sheet sheetnum="1" width="3520" height="2720">
@@ -301,7 +315,8 @@
             <wire x2="1776" y1="992" y2="1008" x1="1776" />
             <wire x2="1792" y1="992" y2="992" x1="1776" />
             <wire x2="1792" y1="992" y2="1008" x1="1792" />
-            <wire x2="1792" y1="1008" y2="1024" x1="1792" />
+            <wire x2="1792" y1="1008" y2="1104" x1="1792" />
+            <wire x2="1792" y1="1104" y2="1168" x1="1792" />
         </branch>
         <bustap x2="1888" y1="1008" y2="1008" x1="1792" />
         <branch name="res(31:0)">
@@ -330,10 +345,6 @@
             <wire x2="2032" y1="992" y2="1008" x1="2032" />
             <wire x2="2192" y1="992" y2="992" x1="2032" />
         </branch>
-        <branch name="overflow">
-            <wire x2="2864" y1="1824" y2="1824" x1="2672" />
-        </branch>
-        <iomarker fontsize="28" x="2864" y="1824" name="overflow" orien="R0" />
         <branch name="zero">
             <wire x2="2784" y1="1424" y2="1424" x1="2688" />
         </branch>
@@ -345,5 +356,19 @@
             <wire x2="2112" y1="1024" y2="1888" x1="2112" />
             <wire x2="2192" y1="1024" y2="1024" x1="2112" />
         </branch>
+        <bustap x2="1888" y1="1104" y2="1104" x1="1792" />
+        <branch name="S(31)">
+            <attrtext style="alignment:SOFT-BCENTER;fontsize:28;fontname:Arial" attrname="Name" x="1896" y="1104" type="branch" />
+            <wire x2="1896" y1="1104" y2="1104" x1="1888" />
+            <wire x2="2240" y1="1104" y2="1104" x1="1896" />
+            <wire x2="2240" y1="1104" y2="1808" x1="2240" />
+            <wire x2="2432" y1="1808" y2="1808" x1="2240" />
+        </branch>
+        <instance x="2432" y="1840" name="XLXI_13" orien="R0">
+        </instance>
+        <branch name="overflow">
+            <wire x2="2848" y1="1808" y2="1808" x1="2816" />
+        </branch>
+        <iomarker fontsize="28" x="2848" y="1808" name="overflow" orien="R0" />
     </sheet>
 </drawing>
