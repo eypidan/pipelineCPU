@@ -19,23 +19,23 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module SCPU_ctrl(
-						input wire [5:0] OPcode,
-						input wire [5:0] Fun,
-						input wire MIO_ready,
-						input wire zero,
-						output reg RegDst,
-						output reg ALUSrc_B,
-						output reg [1:0] DatatoReg,
-						output reg RegWrite,
-						output reg [2:0] ALU_Control,
-						output reg mem_w,
-						output reg [1:0] Branch,
-						output reg Jal,
-						output reg CPU_MIO,
-						output reg ALUSrc_A,
-						output reg zeroExt,
-						output reg DatatoRegExtra
-				  );
+    input wire [5:0] OPcode,
+    input wire [5:0] Fun,
+    input wire MIO_ready,
+    input wire zero,
+    output reg RegDst,
+    output reg ALUSrc_B,
+    output reg [1:0] DatatoReg,
+    output reg RegWrite,
+    output reg [2:0] ALU_Control,
+    output reg mem_w,
+    output reg [1:0] Branch,
+    output reg Jal,
+    output reg CPU_MIO,
+    output reg ALUSrc_A,
+    output reg zeroExt,
+    output reg DatatoRegExtra
+    );
 
 	initial begin
 				RegDst = 0;

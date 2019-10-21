@@ -1,27 +1,8 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date:    12:50:02 10/14/2019 
-// Design Name: 
-// Module Name:    SCPU_More 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
-// Description: 
-//
-// Dependencies: 
-//
-// Revision: 
-// Revision 0.01 - File Created
-// Additional Comments: 
-//
-//////////////////////////////////////////////////////////////////////////////////
 module SCPU_More(
     input [31:0]inst_in,
     input [31:0]Data_in,
-    input reset,
+    input rst,
     input clk,
     input MIO_ready,
     input INT,
@@ -37,8 +18,8 @@ module SCPU_More(
 	wire [2:0]ALU_Control;
 	
 	wire CE,overflow;
-   wire [4:0]writeRegAddr,jalMuxOutput,regRa;
-   wire [31:0]writeRegData,rdata_A,rdata_B,AluA,AluB,pc_4,imm_32,newPC,constWire_4,branchPC,shiftResult,ALU_out;
+    wire [4:0]writeRegAddr,jalMuxOutput,regRa;
+    wire [31:0]writeRegData,rdata_A,rdata_B,AluA,AluB,pc_4,imm_32,newPC,constWire_4,branchPC,shiftResult,ALU_out;
 	wire [25:0]inst_field;
 	//data initial
 	assign regRa = 31;
@@ -49,6 +30,10 @@ module SCPU_More(
 	assign Addr_out = ALU_out;
 	assign Data_out = rdata_B;
 	
+    Pc Pc_instance(
+        .clk
+    );
+
 	SCPU_ctrl CPU_Control_inst (
 		 .OPcode(inst_in[31:26]), 
 		 .Fun(inst_in[5:0]), 
@@ -71,7 +56,7 @@ module SCPU_More(
 	
 	REG32 U1 (
 		 .clk(clk), 
-		 .rst(reset), 
+		 .rst(rst), 
 		 .CE(CE), 
 		 .D(newPC), 
 		 .Q(PC_out)
@@ -124,7 +109,7 @@ module SCPU_More(
 		 
 	Regs RegisterInstance (
 		 .clk(clk), 
-		 .rst(reset), 
+		 .rst(rst), 
 		 .L_S(RegWrite), 
 		 .R_addr_A(inst_field[25:21]), 
 		 .R_addr_B(inst_field[20:16]), 
