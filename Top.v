@@ -131,7 +131,7 @@ module Top(
 	//U4
 	MIO_BUS U4(
 		.clk(clk_100mhz),
-		.rst(AntiJitter_SW_OK[14]),
+		.rst(AntiJitter_rst),
 		.BTN(AntiJitter_BTN_OK[3:0]),
 		.SW(AntiJitter_SW_OK[15:0]),
 		.mem_w(Cpu_mem_w),
@@ -156,7 +156,7 @@ module Top(
 	//U5
 	Multi_8CH32 U5 (
 		.clk(~ClkDiv_CpuClk),
-		.rst(AntiJitter_SW_OK[14]),
+		.rst(AntiJitter_rst),
 		.EN(Bus_Mux_EN),
 		.Test(AntiJitter_SW_OK[7:5]),
 		.point_in({ClkDiv_Div, ClkDiv_Div}),
@@ -177,7 +177,7 @@ module Top(
 	//U6
 	SSeg7_Dev U6 (
 		.clk(clk_100mhz),//时钟
-		.rst(AntiJitter_SW_OK[14]),//复位
+		.rst(AntiJitter_rst),//复位
 		.Start(ClkDiv_Div[20]),//串行扫描启动
 		.Mode(AntiJitter_SW_OK[0]),//文本(16进制)/图型(点阵)切换
 		.flash(ClkDiv_Div[25]),//七段码闪烁频率
@@ -193,7 +193,7 @@ module Top(
 	//U7
 	SPIO U7 (
 		.clk(~ClkDiv_CpuClk),//时钟
-		.rst(AntiJitter_SW_OK[14]),//复位
+		.rst(AntiJitter_rst),//复位
 		.EN(Bus_SPIO_EN),//PIO/LED显示刷新使能
 		.Start(ClkDiv_Div[20]),//串行扫描启动
 		.P_Data(Bus_Peripheral_in),//并行输入，用于串行输出数据
@@ -236,7 +236,7 @@ module Top(
 	//U10
 	Counter_x U10 (
 		.clk(~ClkDiv_CpuClk),
-		.rst(AntiJitter_SW_OK[14]),
+		.rst(AntiJitter_rst),
 		.clk0(ClkDiv_Div[6]),
 		.clk1(ClkDiv_Div[9]),
 		.clk2(ClkDiv_Div[11]),

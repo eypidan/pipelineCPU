@@ -1,1 +1,1 @@
-sch2hdl,-sympath,C:/Users/px/Desktop/fuckingCPU/CPU_code/ipcore_dir,-intstyle,ise,-family,kintex7,-verilog,C:/Users/px/Desktop/fuckingCPU/CPU_code/ALU.vf,-w,C:/Users/px/Desktop/fuckingCPU/CPU_code/ALU.sch
+sch2hdl,-sympath,C:/Users/px/Desktop/1.zju/1.Class And Learn/3.computerArchitecture/work2/CPU_code_stall/ipcore_dir,-intstyle,ise,-family,kintex7,-verilog,C:/Users/px/Desktop/1.zju/1.Class And Learn/3.computerArchitecture/work2/CPU_code_stall/ALU.vf,-w,C:/Users/px/Desktop/1.zju/1.Class And Learn/3.computerArchitecture/work2/CPU_code_stall/ALU.sch

@@ -39,10 +39,10 @@ module Data_path(
 	 output [31:0]PC_out,
 	 output [31:0]Data_out
     );
-	 wire CE,overflow;
-	 wire [4:0]writeRegAddr,jalMuxOutput,regRa;
-	 wire [31:0]writeRegData,rdata_A,rdata_B,AluA,AluB,pc_4,imm_32,newPC,constWire_4,branchPC,shiftResult;
-	 
+   wire CE,overflow;
+   wire [4:0]writeRegAddr,jalMuxOutput,regRa;
+   wire [31:0]writeRegData,rdata_A,rdata_B,AluA,AluB,pc_4,imm_32,newPC,constWire_4,branchPC,shiftResult;
+ 
 	//data initial
 	assign regRa = 31;
 	assign Data_out = rdata_B;
@@ -146,35 +146,5 @@ module Data_path(
 		 .A(inst_field[10:6]), 
 		 .B(shiftResult)
 		 );
-/*		 
-	add_32 instance_name (
-		.a(a), 
-		.b(b), 
-		.c(c)
-	);
 
-	
-
-	MUX2T1_5 instance_name (
-		 .I0(I0), 
-		 .I1(I1), 
-		 .s(s), 
-		 .o(o)
-		 );
-		 
-	MUX4T1_32 instance_name (
-		 .I0(I0), 
-		 .I1(I1), 
-		 .I2(I2), 
-		 .I3(I3), 
-		 .s(s), 
-		 .o(o)
-		 );
-		 
-	Ext_5_to_32 instance_name (
-		 .A(A), 
-		 .B(B)
-		 );
-
-*/
 endmodule
