@@ -104,31 +104,9 @@ module pipeLineCPU(
 		 .o(writeRegData)
 		 );
 		 
-	Regs RegisterInstance (
-		 .clk(clk), 
-		 .rst(rst), 
-		 .L_S(RegWrite), 
-		 .R_addr_A(inst_field[25:21]), 
-		 .R_addr_B(inst_field[20:16]), 
-		 .Wt_addr(writeRegAddr), 
-		 .Wt_data(writeRegData), 
-		 .rdata_A(rdata_A), 
-		 .rdata_B(rdata_B)
-		 );
+
 		 
-	 MUX2T1_32 Alu_input1 (
-		 .I0(rdata_A), 
-		 .I1(shiftResult), 
-		 .s(ALUSrc_A), 
-		 .o(AluA)
-		 );
-		 
-	 MUX2T1_32 Alu_input2 (
-		 .I0(rdata_B), 
-		 .I1(imm_32), 
-		 .s(ALUSrc_B), 
-		 .o(AluB)
-	 );
+
 	
 	ALU ALU_instance (
 		.A(AluA), 

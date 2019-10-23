@@ -5,19 +5,15 @@ module pipeLineCPU_ctrl(
     input wire [5:0] Fun,
     input wire MIO_ready,
     input wire zero,
-    output reg RegDst,
-    output reg ALUSrc_B,
-    output reg [1:0] DatatoReg,
-    output reg RegWrite,
-    output reg [2:0] ALU_Control,
-    output reg mem_w,
-    output reg [1:0] Branch,
-    output reg Jal,
-    output reg CPU_MIO,
-    output reg ALUSrc_A,
-    output reg zeroExt,
-    output reg DatatoRegExtra,
-    output shouldStall
+    output jal,
+    output writeRegister,
+    output whichWriteRegister,
+    output [3:0]ALU_Control,
+    output regRtOrImm,
+    output shift,
+    output zeroOrSignExtention,
+    output writeToRtOrRd,
+    output 
     );
 
 	initial begin
@@ -94,7 +90,7 @@ module pipeLineCPU_ctrl(
                             RegDst = 1; ALU_Control = 3'b110; ALUSrc_B = 0; DatatoReg = 2'b00;ALUSrc_A = 0; 
                             Jal = 0; Branch = 2'b00; RegWrite = 0; mem_w = 0;zeroExt = 0;DatatoRegExtra=0;end
                         end
-        6'b001010: begin //slti£¬Ôö¼ÓALUop±àÂë
+        6'b001010: begin 
                     RegDst = 0; ALU_Control = 3'b110; ALUSrc_B = 1; DatatoReg = 2'b00; ALUSrc_A = 0;
                         Jal = 0; Branch = 2'b00; RegWrite = 1; mem_w = 0;zeroExt = 0;DatatoRegExtra=0;end
         6'b001000: begin //addi
