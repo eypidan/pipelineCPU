@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-module SCPU_More(
+module pipeLineCPU(
     input [31:0]inst_in,
     input [31:0]Data_in,
     input rst,
@@ -14,40 +14,41 @@ module SCPU_More(
     );
 	
 	
-    wire [31:0] nextPc, pc;
+    wire [31:0] nextPc, pc, pc_4, id_pc_4, id_instruction;
 
     Pc pcInstance(
         .clk(clk),
         .rst(rst),
         .id_shouldStall(id_shouldStall),
-        .nextPc(nextPc),
-        .pc(pc)  // pc -> output
+        .nextPc(nextPc[31:0]),
+        .pc(pc[31:0])  // pc -> output
     );
+
+    assign PC_out = pc;
 
     IfStage IfstageInstance(
         .clk(clk),
         .pc(pc),
-        .id
+        .id_shouldJumpOrBranch(),
+        .id_jumpOrBranchPc(),
+        .pc_4(pc_4[31:0]),  //output
+        .nextPc(nextPc[31:0]) //output
     );
 
-	SCPU_ctrl CPU_Control_inst (
-		 .OPcode(inst_in[31:26]), 
-		 .Fun(inst_in[5:0]), 
-		 .MIO_ready(MIO_ready), 
-		 .zero(zero), 
-		 .RegDst(RegDst), 
-		 .ALUSrc_B(ALUSrc_B), 
-		 .DatatoReg(DatatoReg), 
-		 .RegWrite(RegWrite), 
-		 .ALU_Control(ALU_Control), 
-		 .mem_w(mem_w), 
-		 .Branch(Branch), 
-		 .Jal(Jal), 
-		 .DatatoRegExtra(DatatoRegExtra),
-		 .CPU_MIO(CPU_MIO), 
-		 .zeroExt(zeroExt),
-		 .ALUSrc_A(ALUSrc_A)
-		 );
+    IfIdRegisters IfIdRegistersInstance(
+        .clk(clk),
+        .rst(rst),
+        .id_shouldStall(),
+        .if_pc_4(pc_4[31:0]),
+        .if_instruction(inst_in[31:0]),
+        .id_pc_4(id_pc_4[31:0]),//output
+        .id_instruction(id_instruction[31:0]) // output
+    );
+
+
+
+
+	
 		 
 	
 	REG32 U1 (

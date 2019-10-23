@@ -1,52 +1,39 @@
 `timescale 1ns / 1ps
 
 module IdStage (
-
 		input clk,
 		input rst,
-
 		input [31:0] pc_4,
-
 		input [31:0] instruction,
 
-		output shouldJumpOrBranch,	// BRANCH
-		output [31:0] jumpOrBranchPc,
-
-		output [31:0] shiftAmount,
-		output [31:0] immediate,
-
-		output [31:0] registerRsOrPc_4,
-		output [31:0] registerRtOrZero,
-
-		output [3:0] aluOperation,	// ALUC
-		output shouldAluUseShiftAmountElseRegisterRsOrPc_4,	// SHIFT
-		output shouldAluUseImmeidateElseRegisterRtOrZero,	// ALUIMM
-
-		output shouldWriteRegister,	// WREG
-		output [4:0] registerWriteAddress,
-		output shouldWriteMemoryElseAluOutputToRegister,	// M2REG
-
-		output shouldWriteMemory,	// WMEM
-
-		input wb_shouldWriteRegister,
-		input [4:0] wb_registerWriteAddress,
-		input [31:0] wb_registerWriteData,
-
-		input ex_shouldWriteRegister,
-		input [4:0] ex_registerWriteAddress,
-		input ex_shouldWriteMemoryElseAluOutputToRegister,
-		input [31:0] ex_aluOutput,
-		input mem_shouldWriteRegister,
-		input [4:0] mem_registerWriteAddress,
-		input mem_shouldWriteMemoryElseAluOutputToRegister,
-		input [31:0] mem_aluOutput,
-		input [31:0] mem_memoryData,
-		output shouldStall,	// WPCIR
-
-		output debug_shouldForwardRegisterRs,
-		output debug_shouldForwardRegisterRt,
-		output [32 * 32 - 1 : 0] debug_registers
 	);
+    wire MIO_ready; // useless for now
+    
+
+    pipeLineCPU_ctrl CPU_Control_inst (
+        .OPcode(instruction[31:26]), 
+        .Fun(instruction[5:0]), 
+        .MIO_ready(MIO_ready), 
+        .zero(zero), 
+        //output below
+        .RegDst(RegDst), 
+        .ALUSrc_B(ALUSrc_B), 
+        .DatatoReg(DatatoReg), 
+        .RegWrite(RegWrite), 
+        .ALU_Control(ALU_Control), 
+        .mem_w(mem_w), 
+        .Branch(Branch), 
+        .Jal(Jal), 
+        .DatatoRegExtra(DatatoRegExtra),
+        .CPU_MIO(CPU_MIO), 
+        .zeroExt(zeroExt),
+        .ALUSrc_A(ALUSrc_A)
+    );
+
+
+
+
+
 
 	wire isJumpIndex;	// JUMP
 	wire [25:0] jumpIndex;	// address

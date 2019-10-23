@@ -16,7 +16,7 @@ module IfIdRegisters (
 			id_instruction <= 0;
 		end else if (id_shouldStall) begin
 			id_pc_4 <= id_pc_4;
-			id_instruction <= id_instruction;
+			id_instruction <= 0;  // when stall,push bable into next stage
 		end else begin
 			id_pc_4 <= if_pc_4;
 			id_instruction <= if_instruction;
