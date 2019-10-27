@@ -13,7 +13,12 @@ module pipeLineCPU_ctrl(
     output shift,
     output zeroOrSignExtention,
     output writeToRtOrRd,
-    output 
+    output rsDataBeExeStageAluOutput, // rs here indicate the final output data from 4-1 selector(register rs output) 
+    output rsDataBeMemStageAluOutput,
+    output rsDataBeMemStageMemOutput,
+    output rsDataBeExeStageAluOutput, // rs here indicate the final output data from 4-1 selector(register rt output) 
+    output rsDataBeMemStageAluOutput,
+    output rsDataBeMemStageMemOutput
     );
 
 	initial begin

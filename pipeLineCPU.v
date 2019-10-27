@@ -88,20 +88,20 @@ module pipeLineCPU(
     );
 	 
 	 MUX2T1_5 jalMux (
-		 .I0(inst_field[20:16]), 
-		 .I1(regRa), 
-		 .s(Jal), 
-		 .o(jalMuxOutput)
+        .I0(inst_field[20:16]), 
+        .I1(regRa), 
+        .s(Jal), 
+        .o(jalMuxOutput)
     );
 	 
 	MUX5T1_32 writeRegMux5 (
-		 .I0(ALU_out), 
-		 .I1(Data_in), 
-		 .I2({inst_field[15:0],16'b0}), 
-		 .I3(pc_4), 
-		 .I4({31'b0,overflow}),
-		 .s({DatatoRegExtra,DatatoReg[1],DatatoReg[0]}), 
-		 .o(writeRegData)
+        .I0(ALU_out), 
+        .I1(Data_in), 
+        .I2({inst_field[15:0],16'b0}), 
+        .I3(pc_4), 
+        .I4({31'b0,overflow}),
+        .s({DatatoRegExtra,DatatoReg[1],DatatoReg[0]}), 
+        .o(writeRegData)
 		 );
 		 
 
