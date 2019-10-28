@@ -1,30 +1,21 @@
 `timescale 1ns / 1ps
 
 module IdExRegisters (
-
 		input clk,
 		input rst,
-
 		input id_shouldStall,
-
 		input [31:0] id_instruction,
-
 		input [31:0] id_shiftAmount,
 		input [31:0] id_immediate,
-
 		input [31:0] id_registerRsOrPc_4,
 		input [31:0] id_registerRtOrZero,
-
 		input [3:0] id_aluOperation,
 		input id_shouldAluUseShiftAmountElseRegisterRsOrPc_4,
 		input id_shouldAluUseImmeidateElseRegisterRtOrZero,
-
 		input id_shouldWriteRegister,
 		input [4:0] id_registerWriteAddress,
 		input id_shouldWriteMemoryElseAluOutputToRegister,
-
 		input id_shouldWriteMemory,
-
 		output reg [31:0] ex_instruction = 0,
 
 		output reg [31:0] ex_shiftAmount = 0,

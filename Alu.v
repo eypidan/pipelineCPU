@@ -23,3 +23,4 @@ module Alu (
 			: operation == `ALU_SRA ? inputB >>> inputA
 			: 32'b0;
 endmodule
+
