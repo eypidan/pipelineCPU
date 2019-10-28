@@ -10,6 +10,7 @@
 `define ALU_SLL  4'b1000
 `define ALU_SRL  4'b1001
 `define ALU_SRA  4'b1010
+`define ALU_NONE 12
 
 //  ==== OPcode ====
 `define CODE_J 2
