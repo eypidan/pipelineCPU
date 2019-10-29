@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 //ALU
 `define ALU_ADD  4'b0000
 `define ALU_ADDU 4'b0001

@@ -1,7 +1,4 @@
-`timescale 1ns / 1ps
-
-`include "constants.vh"
-
+`include "define.vh"
 module Alu (
 		input [31:0] inputA,
 		input [31:0] inputB,

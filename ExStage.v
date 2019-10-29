@@ -11,12 +11,13 @@ module ExStage (
     input [31:0] registerRsOrPc_4,
     input [31:0] registerRtOrZero,
 
-    output [31:0] aluOutput,
+    output [31:0] aluOutput
 );
 
 	wire [31:0] aluInputA = whileShiftAluInput_A_UseShamt ? shiftAmount : registerRsOrPc_4;
 	wire [31:0] aluInputB = aluInput_B_UseRtOrImmeidate ? immediate : registerRtOrZero;
-	Alu alu (
+	
+	Alu aluw (
 		.inputA(aluInputA[31:0]),
 		.inputB(aluInputB[31:0]),
 		.operation(aluOperation[3:0]),

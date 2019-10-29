@@ -55,7 +55,7 @@ module IdExRegisters (
             ex_ifWriteRegsFile <= id_ifWriteRegsFile;
             ex_ifWriteMem <= id_ifWriteMem;
             ex_whileShiftAluInput_A_UseShamt <= id_whileShiftAluInput_A_UseShamt;
-            ex_memOutOrAluOutWriteBackToRegFile <= id_memOutOrAluOutWriteBackToRegFile
+            ex_memOutOrAluOutWriteBackToRegFile <= id_memOutOrAluOutWriteBackToRegFile;
             ex_aluInput_B_UseRtOrImmeidate <= id_aluInput_B_UseRtOrImmeidate;
         end
     end
