@@ -4,20 +4,15 @@ module MemWbRegisters (
 
 		input clk,
 		input rst,
-
-		input [31:0] mem_instruction,
-
-		input mem_shouldWriteRegister,
+        input mem_ifWriteRegsFile,
+        input mem_memOutOrAluOutWriteBackToRegFile,
 		input [4:0] mem_registerWriteAddress,
-		input mem_shouldWriteMemoryElseAluOutputToRegister,
 		input [31:0] mem_memoryData,
 		input [31:0] mem_aluOutput,
-
-		output reg [31:0] wb_instruction = 0,
-
-		output reg wb_shouldWriteRegister = 0,
-		output reg [4:0] wb_registerWriteAddress = 0,
-		output reg wb_shouldWriteMemoryElseAluOutputToRegister = 0,
+	
+		output reg wb_ifWriteRegsFile = 0,
+		output reg wb_memOutOrAluOutWriteBackToRegFile = 0,
+        output reg [4:0] wb_registerWriteAddress = 0,
 		output reg [31:0] wb_memoryData = 0,
 		output reg [31:0] wb_aluOutput = 0
 	);
@@ -25,22 +20,16 @@ module MemWbRegisters (
 	always @(posedge clk) begin
 
 		if (rst) begin
-
-			wb_instruction <= 0;
-
-			wb_shouldWriteRegister <= 0;
+			wb_ifWriteRegsFile <= 0;
+			wb_memOutOrAluOutWriteBackToRegFile <= 0;
 			wb_registerWriteAddress <= 0;
-			wb_shouldWriteMemoryElseAluOutputToRegister <= 0;
 			wb_memoryData <= 0;
 			wb_aluOutput <= 0;
 
 		end else begin
-
-			wb_instruction <= mem_instruction;
-
-			wb_shouldWriteRegister <= mem_shouldWriteRegister;
+			wb_ifWriteRegsFile <= mem_ifWriteRegsFile;
+			wb_memOutOrAluOutWriteBackToRegFile <= mem_memOutOrAluOutWriteBackToRegFile;
 			wb_registerWriteAddress <= mem_registerWriteAddress;
-			wb_shouldWriteMemoryElseAluOutputToRegister <= mem_shouldWriteMemoryElseAluOutputToRegister;
 			wb_memoryData <= mem_memoryData;
 			wb_aluOutput <= mem_aluOutput;
 		end

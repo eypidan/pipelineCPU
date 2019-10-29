@@ -16,7 +16,7 @@ module ExMemRegisters (
     output reg mem_memOutOrAluOutWriteBackToRegFile = 0,
     output reg mem_ifWriteMem = 0,
     output reg [4:0] mem_registerWriteAddress = 0,
-    output reg [31:0] mem_aluOutput = 0,
+    output reg [31:0] mem_aluOutput = 0, // also need pass to RAM
     output reg [31:0] mem_registerRtOrZero = 0
 );
 
