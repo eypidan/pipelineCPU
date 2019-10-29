@@ -1,25 +1,21 @@
 `timescale 1ns / 1ps
 
 module ExStage (
+    input [31:0] shiftAmount,
+    input [31:0] immediate,
 
-		input [31:0] shiftAmount,
-		input [31:0] immediate,
+    input [3:0] aluOperation,	// EALUC
+    input whileShiftAluInput_A_UseShamt,	// ESHIFT
+    input aluInput_B_UseRtOrImmeidate,	// EALUIMM
 
-		input [3:0] aluOperation,	// EALUC
-		input shouldAluUseShiftAmountElseRegisterRsOrPc_4,	// ESHIFT
-		input shouldAluUseImmeidateElseRegisterRtOrZero,	// EALUIMM
+    input [31:0] registerRsOrPc_4,
+    input [31:0] registerRtOrZero,
 
-		input [31:0] registerRsOrPc_4,
-		input [31:0] registerRtOrZero,
+    output [31:0] aluOutput,
+);
 
-		output [31:0] aluOutput,
-
-		output [31:0] debug_aluInputA,
-		output [31:0] debug_aluInputB
-	);
-
-	wire [31:0] aluInputA = shouldAluUseShiftAmountElseRegisterRsOrPc_4 ? shiftAmount : registerRsOrPc_4;
-	wire [31:0] aluInputB = shouldAluUseImmeidateElseRegisterRtOrZero ? immediate : registerRtOrZero;
+	wire [31:0] aluInputA = whileShiftAluInput_A_UseShamt ? shiftAmount : registerRsOrPc_4;
+	wire [31:0] aluInputB = aluInput_B_UseRtOrImmeidate ? immediate : registerRtOrZero;
 	Alu alu (
 		.inputA(aluInputA[31:0]),
 		.inputB(aluInputB[31:0]),
@@ -27,6 +23,4 @@ module ExStage (
 		.output_(aluOutput[31:0])
 	);
 
-	assign debug_aluInputA = aluInputA;
-	assign debug_aluInputB = aluInputB;
 endmodule
