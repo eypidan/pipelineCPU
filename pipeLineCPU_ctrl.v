@@ -9,7 +9,7 @@ module pipeLineCPU_ctrl(
     input wire ex_shouldWriteRegister,
     input wire mem_shouldWriteRegister,
     input wire [4:0] ex_registerWriteAddress,
-    input wire [4:0] mem_registerWriteAddress
+    input wire [4:0] mem_registerWriteAddress,
     output wire jal,
     output wire jump,
     output wire jumpRs,
@@ -22,7 +22,6 @@ module pipeLineCPU_ctrl(
     output wire memOutOrAluOutWriteBackToRegFile,
     output wire zeroOrSignExtention,
     output wire aluInput_B_UseRtOrImmeidate,
-    output wire [25:0]jumpAddress,
     output wire shouldStall
     );
 
@@ -32,7 +31,6 @@ module pipeLineCPU_ctrl(
 
     //j and jal
     assign jump = (OPcode==`CODE_J || OPcode==`CODE_JAL );
-    assign jumpAddress = instruction[25:0];
     assign jal = OPcode==`CODE_JAL;
     //jr
     assign jumpRs = isRType && (func == `FUNC_JR);

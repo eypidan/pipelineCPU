@@ -16,4 +16,5 @@ module Pc (
 			pc <= nextPc;
 		end
 	end
+
 endmodule

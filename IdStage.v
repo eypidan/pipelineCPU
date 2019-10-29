@@ -8,26 +8,38 @@ module IdStage (
         input wb_RegWrite,  //wb_ means from wb
         input [4:0]wb_writeRegAddr,
         input [31:0]wb_writeRegData,
-        
+        input ex_shouldWriteRegister,
+        input mem_shouldWriteRegister,
+        input [4:0] ex_registerWriteAddress,
+        input [4:0] mem_registerWriteAddress,
+
         output [31:0]jumpOrBranchPc, // connect to if stage
         output [31:0]registerRtOrZero,
         output [31:0]registerRsOrPc_4,
         output [31:0]immediate,
-        output [3:0] writeBackDestination,
+        output [4:0] registerWriteBackDestination,
         output [3:0]ALU_Opeartion,
-        output RegWrite,
-        output mem_write,
-        output shouldJumpOrBranch
+        output shouldJumpOrBranch,
+        output ifWriteRegsFile,
+        output ifWriteMem,
+        output whileShiftAluInput_A_UseShamt,
+        output memOutOrAluOutWriteBackToRegFile,
+        output aluInput_B_UseRtOrImmeidate,
+        output shouldStall
 	);
 
     wire MIO_ready; // useless for now
     wire ifRsEqualRt;
     wire [31:0]rdata_A,rdata_B;
 
-    pipeLineCPU_ctrl controlUnitInstance (
+    pipeLineCPU_ctrl instance_name (
         .instruction(instruction[31:0]), 
         .MIO_ready(MIO_ready), 
         .ifRsEqualRt(ifRsEqualRt), 
+        .ex_shouldWriteRegister(ex_shouldWriteRegister), 
+        .mem_shouldWriteRegister(mem_shouldWriteRegister), 
+        .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
+        .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .jal(jal), 
         .jump(jump), 
         .jumpRs(jumpRs), 
@@ -40,7 +52,6 @@ module IdStage (
         .memOutOrAluOutWriteBackToRegFile(memOutOrAluOutWriteBackToRegFile), 
         .zeroOrSignExtention(zeroOrSignExtention), 
         .aluInput_B_UseRtOrImmeidate(aluInput_B_UseRtOrImmeidate), 
-        .jumpAddress(jumpAddress[25:0]), 
         .shouldStall(shouldStall)
     );
 
@@ -63,7 +74,7 @@ module IdStage (
     //calculate rd,rt,or $ra will be finally write back 
     wire [4:0] RdOrRs;
     assign RdOrRs = writeToRtOrRd ? instruction[15:11] : instruction[20:16];
-    assign writeBackDestination = jal ? 31 : RdOrRs;
+    assign registerWriteBackDestination = jal ? 31 : RdOrRs;
     
     //deal witch jump or branch
     wire [31:0] branchAddress = pc_4 + {14{instruction[15]},instruction[15:0],2'b0};
@@ -75,7 +86,7 @@ module IdStage (
     
     //---
     assign registerRtOrZero = jal ? 0 : finalRt;
-    assign registerRsOrPc_4 = jal ? registerRsOrPc_4 : finalRs;
+    assign registerRsOrPc_4 = jal ? pc_4 : finalRs;
 
     //calculate immediate
     assign immediate = {zeroOrSignExtention ? 16'b0 : {16{instruction[15]}},instruction[15:0]};
