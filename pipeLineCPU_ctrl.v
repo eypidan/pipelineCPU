@@ -6,6 +6,10 @@ module pipeLineCPU_ctrl(
     input wire [31:0] instruction,
     input wire MIO_ready,
     input wire ifRsEqualRt,
+    input wire ex_shouldWriteRegister,
+    input wire mem_shouldWriteRegister,
+    input wire [4:0] ex_registerWriteAddress,
+    input wire [4:0] mem_registerWriteAddress
     output wire jal,
     output wire jump,
     output wire jumpRs,
@@ -107,8 +111,14 @@ module pipeLineCPU_ctrl(
     wire [4:0]rs = instruction[25:21]; 
     wire [4:0]rt = instruction[20:16];
     //deal with control hazard
-
+        // shouldJumpOrBranch have already be calculated
     //deal with data hazard
+    wire willExStageWriteRs = ex_shouldWriteRegister && ex_registerWriteAddress == rs;
+    wire willExStageWriteRt = ex_shouldWriteRegister && ex_registerWriteAddress == rt;
+    wire willMemStageWriteRs = mem_shouldWriteRegister && mem_registerWriteAddress == rs;
+    wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt;
+
+    assign shouldStall = shouldJumpOrBranch || willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs || willMemStageWriteRt;
 
 endmodule
 
