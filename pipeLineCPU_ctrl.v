@@ -5,9 +5,7 @@
 module pipeLineCPU_ctrl(
     input wire [31:0] instruction,
     input wire MIO_ready,
-    input wire zero,
     input wire ifRsEqualRt,
-    input wire 
     output wire jal,
     output wire jump,
     output wire jumpRs,
@@ -20,12 +18,6 @@ module pipeLineCPU_ctrl(
     output wire memOutOrAluOutWriteBackToRegFile,
     output wire zeroOrSignExtention,
     output wire aluInput_B_UseRtOrImmeidate,
-    output wire rsDataBeExeStageAluOutput, // rs here indicate the final output data from 4-1 selector(register rs output) 
-    output wire rsDataBeMemStageAluOutput,
-    output wire rsDataBeMemStageMemOutput,
-    output wire rtDataBeExeStageAluOutput, // rt here indicate the final output data from 4-1 selector(register rt output) 
-    output wire rtDataBeMemStageAluOutput,
-    output wire rtDataBeMemStageMemOutput,
     output wire [25:0]jumpAddress,
     output wire shouldStall
     );
@@ -72,7 +64,7 @@ module pipeLineCPU_ctrl(
         (OPcode == `CODE_ANDI 
         || OPcode == `CODE_ORI 
         || OPcode == `CODE_XORI 
-        || OPcode == `CODE_ANDI ); // this sigal == 1, zero extention
+        || OPcode == `CODE_ANDI ); // this sigal == 1, zero extention !!!! diff with zhangHaiCPU
 
     //determine ALU B input use rt output or imm extention
     assign aluInput_B_UseRtOrImmeidate = (
@@ -119,3 +111,10 @@ module pipeLineCPU_ctrl(
     //deal with data hazard
 
 endmodule
+
+// output wire rsDataBeExeStageAluOutput, // rs here indicate the final output data from 4-1 selector(register rs output) 
+// output wire rsDataBeMemStageAluOutput,
+// output wire rsDataBeMemStageMemOutput,
+// output wire rtDataBeExeStageAluOutput, // rt here indicate the final output data from 4-1 selector(register rt output) 
+// output wire rtDataBeMemStageAluOutput,
+// output wire rtDataBeMemStageMemOutput,
