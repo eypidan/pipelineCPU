@@ -31,7 +31,7 @@ module Regs(
 	assign rdata_A = (R_addr_A == 0) ? 0 : register[R_addr_A];	   	// read
 	assign rdata_B = (R_addr_B == 0) ? 0 : register[R_addr_B];   	// read
 
-	always @(posedge clk or posedge rst) 
+	always @(negedge clk or posedge rst)  // double bump
 	begin   
 		if (rst==1)  
 			for (i=1; i<32; i=i+1)  

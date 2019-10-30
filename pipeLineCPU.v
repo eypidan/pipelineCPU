@@ -14,11 +14,12 @@ module pipeLineCPU(
 );
 
     wire [31:0] nextPc;
-
+    wire ex_shouldJumpOrBranch; //control hazard signal
 	Pc U0 (
         .clk(clk), 
         .rst(rst), 
-        .id_shouldStall(shouldStall), 
+        .id_shouldStall(shouldStall),
+        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch) 
         .nextPc(nextPc[31:0]), 
         .pc(PC_out[31:0])
     );
@@ -30,8 +31,8 @@ module pipeLineCPU(
     IfStage U1 (
         .clk(clk), 
         .pc(PC_out[31:0]), 
-        .id_shouldJumpOrBranch(id_shouldJumpOrBranch), 
-        .id_jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
+        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch), 
+        .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0]), 
         .pc_4(if_pc_4[31:0]), 
         .nextPc(nextPc[31:0])
     );
@@ -43,7 +44,8 @@ module pipeLineCPU(
     IfIdRegisters U2 (
         .clk(clk), 
         .rst(rst), 
-        .id_shouldStall(shouldStall), 
+        .id_shouldStall(shouldStall),
+        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch,) 
         .if_pc_4(if_pc_4[31:0]), 
         .if_instruction(instruction_in[31:0]), 
         .id_pc_4(id_pc_4[31:0]), 
@@ -61,11 +63,11 @@ module pipeLineCPU(
     wire [31:0] ex_registerRsOrPc_4;
     wire [31:0] ex_registerRtOrZero;
     wire [3:0] ex_aluOperation;
-    wire [4:0] ex_registerWriteAddress;
+    wire [4:0] ex_registerWriteAddress; //deal with data hazard, pass signal too 
 
     wire [31:0] wb_writeRegData;
     wire [4:0] mem_registerWriteAddress;
-    wire [4:0] ex_registerWriteAddress; //deal with data hazard
+    
    
     IdStage U3 (
         .clk(clk), 
@@ -76,11 +78,11 @@ module pipeLineCPU(
         .wb_writeRegAddr(wb_registerWriteAddress[4:0]), 
         .wb_writeRegData(wb_writeRegData[31:0]), 
         .ex_shouldWriteRegister(ex_ifWriteRegsFile), 
-        .mem_shouldWriteRegister(mem_shouldWriteRegister), 
+        .mem_shouldWriteRegister(mem_ifWriteRegsFile), 
         .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
-        .registerRtOrZero(id_registerRtOrZero[31:0]), 
+        .registerRtOrZ ero(id_registerRtOrZero[31:0]), 
         .registerRsOrPc_4(id_registerRsOrPc_4[31:0]), 
         .immediate(id_immediate[31:0]), 
         .registerWriteAddress(id_registerWriteAddress[4:0]), 
@@ -97,6 +99,7 @@ module pipeLineCPU(
     IdExRegisters U4 (
         .clk(clk), 
         .rst(rst), 
+        .id_shouldStall(shouldStall),
         .id_shiftAmount(id_shiftAmount[31:0]), 
         .id_immediate(id_immediate[31:0]), 
         .id_registerRsOrPc_4(id_registerRsOrPc_4[31:0]), 
@@ -108,6 +111,8 @@ module pipeLineCPU(
         .id_whileShiftAluInput_A_UseShamt(id_whileShiftAluInput_A_UseShamt), 
         .id_memOutOrAluOutWriteBackToRegFile(id_memOutOrAluOutWriteBackToRegFile), 
         .id_aluInput_B_UseRtOrImmeidate(id_aluInput_B_UseRtOrImmeidate), 
+        .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
+        .id_jumpOrBranchPc(id_jumpOrBranchPc[31:0]),
         .ex_shiftAmount(ex_shiftAmount[31:0]), 
         .ex_immediate(ex_immediate[31:0]), 
         .ex_registerRsOrPc_4(ex_registerRsOrPc_4[31:0]), 
@@ -118,14 +123,16 @@ module pipeLineCPU(
         .ex_ifWriteMem(ex_ifWriteMem), 
         .ex_whileShiftAluInput_A_UseShamt(ex_whileShiftAluInput_A_UseShamt), 
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
-        .ex_aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate)
+        .ex_aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate),
+        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch),
+        .ex_jumpOrBranchPc(ex_jumpOrBranchPc)
     );
 
     wire [31:0] ex_aluOutput;
     wire [31:0] ex_registerRtOrZero;
     wire [31:0] mem_aluOutput;
     // wire [31:0] mem_registerRtOrZero;
-    
+
     ExStage U5 (
         .shiftAmount(ex_shiftAmount[31:0]), 
         .immediate(ex_immediate[31:0]), 

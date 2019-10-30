@@ -3,7 +3,7 @@
 module IdExRegisters (
     input clk,
     input rst,
-    // input id_shouldStall,
+    input id_shouldStall,
     input [31:0] id_shiftAmount,
     input [31:0] id_immediate,
     input [31:0] id_registerRsOrPc_4,
@@ -15,6 +15,8 @@ module IdExRegisters (
     input id_whileShiftAluInput_A_UseShamt,
     input id_memOutOrAluOutWriteBackToRegFile,
     input id_aluInput_B_UseRtOrImmeidate,
+    input id_shouldJumpOrBranch,
+    input [31:0] id_jumpOrBranchPc,
     output reg [31:0] ex_shiftAmount = 0,
     output reg [31:0] ex_immediate = 0,
     output reg [31:0] ex_registerRsOrPc_4 = 0,
@@ -26,10 +28,12 @@ module IdExRegisters (
     output reg ex_whileShiftAluInput_A_UseShamt = 0,
     output reg ex_memOutOrAluOutWriteBackToRegFile = 0,
     output reg ex_aluInput_B_UseRtOrImmeidate = 0,
+    output reg ex_shouldJumpOrBranch =0  ,
+    output reg [31:0] ex_jumpOrBranchPc = 0;
 );
 
 	always @(posedge clk) begin
-        if(rst) begin
+        if(rst || id_shouldStall) begin
             ex_shiftAmount <=0 ;
             ex_immediate <= 0;
             ex_registerRsOrPc_4 <= 0;
@@ -42,7 +46,8 @@ module IdExRegisters (
             ex_whileShiftAluInput_A_UseShamt <= 0;
             ex_memOutOrAluOutWriteBackToRegFile <=0 ;
             ex_aluInput_B_UseRtOrImmeidate <= 0;
-
+            ex_shouldJumpOrBranch <= 0;
+            ex_jumpOrBranchPc <= 0;
         end else begin
             ex_shiftAmount <= id_shiftAmount;
             ex_immediate <= id_immediate; 
@@ -56,6 +61,8 @@ module IdExRegisters (
             ex_whileShiftAluInput_A_UseShamt <= id_whileShiftAluInput_A_UseShamt;
             ex_memOutOrAluOutWriteBackToRegFile <= id_memOutOrAluOutWriteBackToRegFile;
             ex_aluInput_B_UseRtOrImmeidate <= id_aluInput_B_UseRtOrImmeidate;
+            ex_shouldJumpOrBranch <= id_shouldJumpOrBranch;
+            ex_jumpOrBranchPc <= id_jumpOrBranchPc;
         end
     end
 

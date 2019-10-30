@@ -113,11 +113,11 @@ module pipeLineCPU_ctrl(
     wire willExStageWriteRs = ex_shouldWriteRegister && ex_registerWriteAddress == rs;
     wire willExStageWriteRt = ex_shouldWriteRegister && ex_registerWriteAddress == rt;
     
-    //useless for now 
+    //
     wire willMemStageWriteRs = mem_shouldWriteRegister && mem_registerWriteAddress == rs;
     wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt;
 
-    assign shouldStall = shouldJumpOrBranch || willExStageWriteRs || willExStageWriteRt;
+    assign shouldStall = shouldJumpOrBranch || willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
 
 endmodule
 
