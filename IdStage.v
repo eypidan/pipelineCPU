@@ -6,19 +6,19 @@ module IdStage (
 		input [31:0] pc_4,
 		input [31:0] instruction,
         input wb_RegWrite,  //wb_ means from wb
-        input [4:0]wb_writeRegAddr,
+        input [4:0] wb_writeRegAddr,
         input [31:0]wb_writeRegData,
         input ex_shouldWriteRegister,
         input mem_shouldWriteRegister,
         input [4:0] ex_registerWriteAddress,
         input [4:0] mem_registerWriteAddress,
 
-        output [31:0]jumpOrBranchPc, // connect to if stage
-        output [31:0]registerRtOrZero,
-        output [31:0]registerRsOrPc_4,
-        output [31:0]immediate,
-        output [4:0] registerWriteBackDestination,
-        output [3:0]ALU_Opeartion,
+        output [31:0] jumpOrBranchPc, // connect to if stage
+        output [31:0] registerRtOrZero,
+        output [31:0] registerRsOrPc_4,
+        output [31:0] immediate,
+        output [4:0] registerWriteAddress,
+        output [3:0] ALU_Opeartion,
         output shouldJumpOrBranch,
         output ifWriteRegsFile,
         output ifWriteMem,
@@ -32,7 +32,7 @@ module IdStage (
     wire ifRsEqualRt;
     wire [31:0]rdata_A,rdata_B;
 
-    pipeLineCPU_ctrl instance_name (
+    pipeLineCPU_ctrl pipeLineCPU_ctrl_instance (
         .instruction(instruction[31:0]), 
         .MIO_ready(MIO_ready), 
         .ifRsEqualRt(ifRsEqualRt), 
@@ -61,8 +61,8 @@ module IdStage (
         .L_S(wb_RegWrite), 
         .R_addr_A(instruction[25:21]), 
         .R_addr_B(instruction[20:16]),
-        .Wt_addr(wb_writeRegAddr), 
-        .Wt_data(wb_writeRegData), 
+        .Wt_addr(wb_writeRegAddr[4:0]), 
+        .Wt_data(wb_writeRegData[31:0]), 
         .rdata_A(rdata_A), 
         .rdata_B(rdata_B)
     );
@@ -74,7 +74,7 @@ module IdStage (
     //calculate rd,rt,or $ra will be finally write back 
     wire [4:0] RdOrRs;
     assign RdOrRs = writeToRtOrRd ? instruction[15:11] : instruction[20:16];
-    assign registerWriteBackDestination = jal ? 31 : RdOrRs;
+    assign registerWriteAddress = jal ? 31 : RdOrRs;
     
     //deal witch jump or branch
     wire [31:0] branchAddress = pc_4 + {14{instruction[15]},instruction[15:0],2'b0};

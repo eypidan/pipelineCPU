@@ -25,6 +25,8 @@ module pipeLineCPU(
 
     wire [31:0] if_pc_4;
     wire [31:0] id_jumpOrBranchPc; 
+    wire id_shouldJumpOrBranch;
+
     IfStage U1 (
         .clk(clk), 
         .pc(PC_out[31:0]), 
@@ -37,6 +39,7 @@ module pipeLineCPU(
 
     wire [31:0] id_pc_4;
     wire [31:0] id_instruction;
+     
     IfIdRegisters U2 (
         .clk(clk), 
         .rst(rst), 
@@ -52,16 +55,18 @@ module pipeLineCPU(
     wire [31:0] id_registerRsOrPc_4;
     wire [31:0] id_registerRtOrZero;
     wire [3:0] id_aluOperation; 
-    wire [4:0] id_registerWriteBackDestination;
+    wire [4:0] id_registerWriteAddress;
     wire [31:0] ex_shiftAmount;
     wire [31:0] ex_immediate;
     wire [31:0] ex_registerRsOrPc_4;
     wire [31:0] ex_registerRtOrZero;
     wire [3:0] ex_aluOperation;
-    wire [4:0] ex_registerWriteBackDestination;
+    wire [4:0] ex_registerWriteAddress;
 
     wire [31:0] wb_writeRegData;
-
+    wire [4:0] mem_registerWriteAddress;
+    wire [4:0] ex_registerWriteAddress; //deal with data hazard
+   
     IdStage U3 (
         .clk(clk), 
         .rst(rst), 
@@ -70,7 +75,7 @@ module pipeLineCPU(
         .wb_RegWrite(wb_RegWrite), 
         .wb_writeRegAddr(wb_registerWriteAddress[4:0]), 
         .wb_writeRegData(wb_writeRegData[31:0]), 
-        .ex_shouldWriteRegister(ex_shouldWriteRegister), 
+        .ex_shouldWriteRegister(ex_ifWriteRegsFile), 
         .mem_shouldWriteRegister(mem_shouldWriteRegister), 
         .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
@@ -78,14 +83,14 @@ module pipeLineCPU(
         .registerRtOrZero(id_registerRtOrZero[31:0]), 
         .registerRsOrPc_4(id_registerRsOrPc_4[31:0]), 
         .immediate(id_immediate[31:0]), 
-        .registerWriteBackDestination(id_registerWriteBackDestination[4:0]), 
+        .registerWriteAddress(id_registerWriteAddress[4:0]), 
         .ALU_Opeartion(id_aluOperation[31:0]), 
-        .shouldJumpOrBranch(shouldJumpOrBranch), 
-        .ifWriteRegsFile(ifWriteRegsFile), 
-        .ifWriteMem(ifWriteMem), 
-        .whileShiftAluInput_A_UseShamt(whileShiftAluInput_A_UseShamt), 
-        .memOutOrAluOutWriteBackToRegFile(memOutOrAluOutWriteBackToRegFile), 
-        .aluInput_B_UseRtOrImmeidate(aluInput_B_UseRtOrImmeidate), 
+        .shouldJumpOrBranch(id_shouldJumpOrBranch), 
+        .ifWriteRegsFile(id_ifWriteRegsFile), 
+        .ifWriteMem(id_ifWriteMem), 
+        .whileShiftAluInput_A_UseShamt(id_whileShiftAluInput_A_UseShamt), 
+        .memOutOrAluOutWriteBackToRegFile(id_memOutOrAluOutWriteBackToRegFile), 
+        .aluInput_B_UseRtOrImmeidate(id_aluInput_B_UseRtOrImmeidate), 
         .shouldStall(shouldStall)
     );
 
@@ -97,7 +102,7 @@ module pipeLineCPU(
         .id_registerRsOrPc_4(id_registerRsOrPc_4[31:0]), 
         .id_registerRtOrZero(id_registerRtOrZero[31:0]), 
         .id_aluOperation(id_aluOperation[3:0]), 
-        .id_registerWriteBackDestination(id_registerWriteBackDestination[4:0]), 
+        .id_registerWriteAddress(id_registerWriteAddress[4:0]), 
         .id_ifWriteRegsFile(id_ifWriteRegsFile), 
         .id_ifWriteMem(id_ifWriteMem), 
         .id_whileShiftAluInput_A_UseShamt(id_whileShiftAluInput_A_UseShamt), 
@@ -108,7 +113,7 @@ module pipeLineCPU(
         .ex_registerRsOrPc_4(ex_registerRsOrPc_4[31:0]), 
         .ex_registerRtOrZero(ex_registerRtOrZero[31:0]), 
         .ex_aluOperation(ex_aluOperation[3:0]), 
-        .ex_registerWriteBackDestination(ex_registerWriteBackDestination[4:0]), 
+        .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .ex_ifWriteRegsFile(ex_ifWriteRegsFile), 
         .ex_ifWriteMem(ex_ifWriteMem), 
         .ex_whileShiftAluInput_A_UseShamt(ex_whileShiftAluInput_A_UseShamt), 
@@ -120,6 +125,7 @@ module pipeLineCPU(
     wire [31:0] ex_registerRtOrZero;
     wire [31:0] mem_aluOutput;
     // wire [31:0] mem_registerRtOrZero;
+    
     ExStage U5 (
         .shiftAmount(ex_shiftAmount[31:0]), 
         .immediate(ex_immediate[31:0]), 
@@ -131,9 +137,9 @@ module pipeLineCPU(
         .aluOutput(ex_aluOutput[31:0])
     );
 
-    wire [4:0]mem_registerWriteAddress;
     
-    ExMemRegisters U6 (
+    
+    ExMemRegisters U6 ( //registerWriteAddress
         .clk(clk), 
         .rst(rst), 
         .ex_ifWriteRegsFile(ex_ifWriteRegsFile), 

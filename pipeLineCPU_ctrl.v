@@ -90,7 +90,7 @@ module pipeLineCPU_ctrl(
         || OPcode == `CODE_SLTI;
 
     //determine if need to write Register File
-    assign ifWriteRegsFile = (isRType && !jumpRs) || jal ||  writeToRtOrRd;
+    assign ifWriteRegsFile = (isRType && !jumpRs) || jal ||  writeToRtOrRd; // ?????
 
     //deteremine if write mem
     assign ifWriteMem = OPcode == `CODE_SW;
@@ -112,10 +112,12 @@ module pipeLineCPU_ctrl(
     //deal with data hazard
     wire willExStageWriteRs = ex_shouldWriteRegister && ex_registerWriteAddress == rs;
     wire willExStageWriteRt = ex_shouldWriteRegister && ex_registerWriteAddress == rt;
+    
+    //useless for now 
     wire willMemStageWriteRs = mem_shouldWriteRegister && mem_registerWriteAddress == rs;
     wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt;
 
-    assign shouldStall = shouldJumpOrBranch || willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs || willMemStageWriteRt;
+    assign shouldStall = shouldJumpOrBranch || willExStageWriteRs || willExStageWriteRt;
 
 endmodule
 
