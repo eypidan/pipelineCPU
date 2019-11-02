@@ -6,7 +6,7 @@ module pipeLineCPU(
     input clk,
     input MIO_ready,
     input INT,
-    output mem_w,
+    output mem_ifWriteMem,
     output CPU_MIO,
     output [31:0]Address_out,
     output [31:0]PC_out,
@@ -26,6 +26,7 @@ module pipeLineCPU(
 
     wire [31:0] if_pc_4;
     wire [31:0] id_jumpOrBranchPc; 
+    wire [31:0] ex_jumpOrBranchPc;
     wire id_shouldJumpOrBranch;
 
     IfStage U1 (
@@ -74,7 +75,7 @@ module pipeLineCPU(
         .rst(rst), 
         .pc_4(id_pc_4[31:0]), 
         .instruction(id_instruction[31:0]), 
-        .wb_RegWrite(wb_RegWrite), 
+        .wb_RegWrite(wb_ifWriteRegsFile), 
         .wb_writeRegAddr(wb_registerWriteAddress[4:0]), 
         .wb_writeRegData(wb_writeRegData[31:0]), 
         .ex_shouldWriteRegister(ex_ifWriteRegsFile), 
@@ -125,7 +126,7 @@ module pipeLineCPU(
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
         .ex_aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate),
         .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch),
-        .ex_jumpOrBranchPc(ex_jumpOrBranchPc)
+        .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0])
     );
 
     wire [31:0] ex_aluOutput;
@@ -137,8 +138,8 @@ module pipeLineCPU(
         .shiftAmount(ex_shiftAmount[31:0]), 
         .immediate(ex_immediate[31:0]), 
         .aluOperation(ex_aluOperation[3:0]), 
-        .whileShiftAluInput_A_UseShamt(whileShiftAluInput_A_UseShamt), 
-        .aluInput_B_UseRtOrImmeidate(aluInput_B_UseRtOrImmeidate), 
+        .whileShiftAluInput_A_UseShamt(ex_whileShiftAluInput_A_UseShamt), 
+        .aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate), 
         .registerRsOrPc_4(ex_registerRsOrPc_4[31:0]), 
         .registerRtOrZero(ex_registerRtOrZero[31:0]), 
         .aluOutput(ex_aluOutput[31:0])
@@ -183,7 +184,7 @@ module pipeLineCPU(
     );
 
     WbStage U8 (
-		.memOutOrAluOutWriteBackToRegFile(memOutOrAluOutWriteBackToRegFile),
+		.memOutOrAluOutWriteBackToRegFile(wb_memOutOrAluOutWriteBackToRegFile),
 		.memoryData(wb_memoryData[31:0]),
 		.aluOutput(wb_aluOutput[31:0]),
 		.registerWriteData(wb_writeRegData[31:0])
