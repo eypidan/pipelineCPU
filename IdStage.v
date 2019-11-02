@@ -5,6 +5,12 @@ module IdStage (
     `ifdef DEBUG
 	input  [4:0]debug_addr,
 	output [31:0]debug_data_reg,
+    output debug_shouldJumpOrBranch,
+    output debug_shouldBranch,
+    output debug_jump,
+    output [31:0]debug_id_instruction,
+    output debug_willExStageWriteRs,
+    output debug_id_ifWriteRegsFile,
 	`endif
 
     input clk,
@@ -39,6 +45,13 @@ module IdStage (
     wire [31:0]rdata_A,rdata_B;
 
     pipeLineCPU_ctrl pipeLineCPU_ctrl_instance (
+        `ifdef DEBUG
+        .debug_shouldJumpOrBranch(debug_shouldJumpOrBranch),
+        .debug_shouldBranch(debug_shouldBranch),
+        .debug_jump(debug_jump),
+        .debug_id_instruction(debug_id_instruction[31:0]),
+        .debug_willExStageWriteRs(debug_willExStageWriteRs),
+        `endif
         .instruction(instruction[31:0]), 
         .MIO_ready(MIO_ready), 
         .ifRsEqualRt(ifRsEqualRt), 
@@ -100,4 +113,8 @@ module IdStage (
 
     //calculate immediate
     assign immediate = {zeroOrSignExtention ? 16'b0 : {16{instruction[15]}},instruction[15:0]};
+
+    `ifdef DEBUG
+    debug_id_ifWriteRegsFile = ifWriteRegsFile;
+    `endif
 endmodule

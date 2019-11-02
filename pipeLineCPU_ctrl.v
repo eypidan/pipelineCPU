@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`define DEBUG
 //ALU
 `define ALU_ADD  4'b0000
 `define ALU_ADDU 4'b0001
@@ -49,6 +50,13 @@
 
 
 module pipeLineCPU_ctrl(
+    `ifdef DEBUG
+    output debug_shouldJumpOrBranch,
+    output debug_shouldBranch,
+    output debug_jump,
+    output [31:0]debug_id_instruction,
+    output debug_willExStageWriteRs,
+    `endif
     input wire [31:0] instruction,
     input wire MIO_ready,
     input wire ifRsEqualRt,
@@ -70,6 +78,8 @@ module pipeLineCPU_ctrl(
     output wire aluInput_B_UseRtOrImmeidate,
     output wire shouldStall
     );
+
+    
 
     wire [5:0]OPcode = instruction[31:26];
     wire [5:0]func = instruction[5:0];
@@ -166,6 +176,14 @@ module pipeLineCPU_ctrl(
     wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt;
 
     assign shouldStall = shouldJumpOrBranch || willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
+
+    `ifdef DEBUG
+    assign debug_shouldJumpOrBranch = shouldJumpOrBranch;
+    assign debug_shouldBranch = shouldBranch;
+    assign debug_jump = jump;
+    assign debug_id_instruction[31:0] = instruction[31:0];
+    assign debug_willExStageWriteRs = willExStageWriteRs;
+    `endif
 
 endmodule
 

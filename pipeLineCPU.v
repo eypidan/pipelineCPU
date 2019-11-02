@@ -9,6 +9,13 @@ module pipeLineCPU(
 	output [31:0]debug_data,
     output [31:0]debug_nextPc,
     output debug_ex_shouldJumpOrBranch,
+    output debug_shouldStall,
+    output debug_shouldJumpOrBranch,
+    output debug_shouldBranch,
+    output debug_jump,
+    output [31:0]debug_id_instruction,
+    output debug_willExStageWriteRs,
+    output debug_ex_ifWriteRegsFile,
 	`endif
     input cpu_en,
     input [31:0]instruction_in,
@@ -62,6 +69,10 @@ module pipeLineCPU(
 	reg  [31:0] debug_data_signal;
 	
     assign debug_nextPc = nextPc;
+    assign debug_ex_shouldJumpOrBranch = ex_shouldJumpOrBranch;
+    assign debug_shouldStall = shouldStall;
+    assign debug_ex_ifWriteRegsFile = ex_ifWriteRegsFile;
+
     wire [4:0] addr_rs =  instruction_in[25:21];
     wire [4:0] addr_rt = instruction_in[20:16];
 
@@ -109,8 +120,6 @@ module pipeLineCPU(
         .pc(PC_out[31:0])
     );
 
-    
-
     IfStage U1 (
         .clk(clk), 
         .pc(PC_out[31:0]), 
@@ -119,9 +128,6 @@ module pipeLineCPU(
         .pc_4(if_pc_4[31:0]), 
         .nextPc(nextPc[31:0])
     );
-
-
-    
      
     IfIdRegisters U2 (
         .clk(clk), 
@@ -134,14 +140,16 @@ module pipeLineCPU(
         .id_pc_4(id_pc_4[31:0]), 
         .id_instruction(id_instruction[31:0])
     );
-
-    
-    
    
     IdStage U3 (
         `ifdef DEBUG
-        debug_addr(debug_addr[4:0]),
-        debug_data_reg(debug_data_reg[31:0]),
+        .debug_addr(debug_addr[4:0]),
+        .debug_data_reg(debug_data_reg[31:0]),
+        .debug_shouldJumpOrBranch(debug_shouldJumpOrBranch),
+        .debug_shouldBranch(debug_shouldBranch),
+        .debug_id_instruction(debug_id_instruction[31:0]),
+        .debug_jump(debug_jump),
+        .debug_willExStageWriteRs(debug_willExStageWriteRs),
         `endif
         .clk(clk), 
         .rst(rst), 
@@ -202,8 +210,6 @@ module pipeLineCPU(
         .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0])
     );
 
-    
-
     ExStage U5 (
         .shiftAmount(ex_shiftAmount[31:0]), 
         .immediate(ex_immediate[31:0]), 
@@ -215,8 +221,6 @@ module pipeLineCPU(
         .aluOutput(ex_aluOutput[31:0])
     );
 
-    
-    
     ExMemRegisters U6 ( //registerWriteAddress
         .clk(clk), 
         .rst(rst), 
@@ -235,7 +239,6 @@ module pipeLineCPU(
         .mem_registerRtOrZero(Data_out[31:0])
     );
 
-    
     MemWbRegisters U7 (
         .clk(clk), 
         .rst(rst), 
@@ -258,4 +261,5 @@ module pipeLineCPU(
 		.aluOutput(wb_aluOutput[31:0]),
 		.registerWriteData(wb_writeRegData[31:0])
 	);
+
 endmodule
