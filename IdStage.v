@@ -1,31 +1,36 @@
 `timescale 1ns / 1ps
 
 module IdStage (
-		input clk,
-		input rst,
-		input [31:0] pc_4,
-		input [31:0] instruction,
-        input wb_RegWrite,  //wb_ means from wb
-        input [4:0] wb_writeRegAddr,
-        input [31:0]wb_writeRegData,
-        input ex_shouldWriteRegister,
-        input mem_shouldWriteRegister,
-        input [4:0] ex_registerWriteAddress,
-        input [4:0] mem_registerWriteAddress,
+    `ifdef DEBUG
+	input  [4:0]debug_addr,
+	output [31:0]debug_data_reg,
+	`endif
 
-        output [31:0] jumpOrBranchPc, // connect to if stage
-        output [31:0] registerRtOrZero,
-        output [31:0] registerRsOrPc_4,
-        output [31:0] immediate,
-        output [4:0] registerWriteAddress,
-        output [3:0] ALU_Opeartion,
-        output shouldJumpOrBranch,
-        output ifWriteRegsFile,
-        output ifWriteMem,
-        output whileShiftAluInput_A_UseShamt,
-        output memOutOrAluOutWriteBackToRegFile,
-        output aluInput_B_UseRtOrImmeidate,
-        output shouldStall
+    input clk,
+    input rst,
+    input [31:0] pc_4,
+    input [31:0] instruction,
+    input wb_RegWrite,  //wb_ means from wb
+    input [4:0] wb_writeRegAddr,
+    input [31:0]wb_writeRegData,
+    input ex_shouldWriteRegister,
+    input mem_shouldWriteRegister,
+    input [4:0] ex_registerWriteAddress,
+    input [4:0] mem_registerWriteAddress,
+
+    output [31:0] jumpOrBranchPc, // connect to if stage
+    output [31:0] registerRtOrZero,
+    output [31:0] registerRsOrPc_4,
+    output [31:0] immediate,
+    output [4:0] registerWriteAddress,
+    output [3:0] ALU_Opeartion,
+    output shouldJumpOrBranch,
+    output ifWriteRegsFile,
+    output ifWriteMem,
+    output whileShiftAluInput_A_UseShamt,
+    output memOutOrAluOutWriteBackToRegFile,
+    output aluInput_B_UseRtOrImmeidate,
+    output shouldStall
 	);
 
     wire MIO_ready; // useless for now
@@ -56,6 +61,10 @@ module IdStage (
     );
 
     Regs RegisterInstance (
+        `ifdef DEBUG
+        .debug_addr(debug_addr[4:0]),
+        .debug_data_reg(debug_data_reg[31:0]),
+        `endif
         .clk(clk), 
         .rst(rst), 
         .L_S(wb_RegWrite), 
@@ -77,7 +86,7 @@ module IdStage (
     assign registerWriteAddress = jal ? 31 : RdOrRs;
     
     //deal witch jump or branch
-    wire [31:0] branchAddress = pc_4 + {14{instruction[15]},instruction[15:0],2'b0};
+    wire [31:0] branchAddress = pc_4 + {{14{instruction[15]}},instruction[15:0],2'b0};
     wire [31:0] jumpAddress = jump ? {pc_4[31:28],instruction[25:0],2'b0} : branchAddress;
     wire [31:0] jumpOrBranchPc = jumpRs ? finalRs : jumpAddress;
     

@@ -1,24 +1,10 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date:    17:37:50 04/17/2018 
-// Design Name: 
-// Module Name:    Regs 
-// Project Name: 
-// Target Devices: 
-// Tool versions: 
-// Description: 
-//
-// Dependencies: 
-//
-// Revision: 
-// Revision 0.01 - File Created
-// Additional Comments: 
-//
-//////////////////////////////////////////////////////////////////////////////////
+
 module Regs(
+    `ifdef DEBUG
+	input  [4:0]debug_addr,
+	output [31:0]debug_data_reg,
+	`endif
     input clk,rst,L_S, 
     input [4:0] R_addr_A, R_addr_B, Wt_addr, 
     input [31:0] Wt_data,
@@ -30,6 +16,10 @@ module Regs(
 
 	assign rdata_A = (R_addr_A == 0) ? 0 : register[R_addr_A];	   	// read
 	assign rdata_B = (R_addr_B == 0) ? 0 : register[R_addr_B];   	// read
+
+    `ifdef DEBUG
+    assign debug_data_reg = register[debug_addr];
+    `endif
 
 	always @(negedge clk or posedge rst)  // double bump
 	begin   

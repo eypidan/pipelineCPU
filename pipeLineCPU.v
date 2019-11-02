@@ -1,5 +1,14 @@
 `timescale 1ns / 1ps
+
+`define addr_rs instruction_in[25:21]
+`define addr_rt instruction_in[20:16]
+
+
 module pipeLineCPU(
+    `ifdef DEBUG
+	input  [5:0]debug_addr,
+	output [31:0]debug_data,
+	`endif
     input [31:0]instruction_in,
     input [31:0]Data_in,
     input rst,
@@ -12,14 +21,54 @@ module pipeLineCPU(
     output [31:0]PC_out,
     output [31:0]Data_out
 );
+  // debug
+	`ifdef DEBUG
+	wire [31:0] debug_data_reg;
+	reg [31:0] debug_data_signal;
+	
 
+
+	always @(posedge clk) begin
+		case (debug_addr[4:0])
+			0: debug_data_signal <= PC_out[31:0];
+			1: debug_data_signal <= instruction_in[31:0];
+			2: debug_data_signal <= 0;
+			3: debug_data_signal <= 0;
+			4: debug_data_signal <= 0;
+			5: debug_data_signal <= 0;
+			6: debug_data_signal <= 0;
+			7: debug_data_signal <= 0;
+			8: debug_data_signal <= {27'b0, addr_rs};
+			9: debug_data_signal <= data_rs;
+			10: debug_data_signal <= {27'b0, addr_rt};
+			// 11: debug_data_signal <= data_rt;
+			// 12: debug_data_signal <= data_imm;
+			// 13: debug_data_signal <= opa;
+			// 14: debug_data_signal <= opb;
+			// 15: debug_data_signal <= alu_out;
+			16: debug_data_signal <= 0;
+			17: debug_data_signal <= 0;
+			// 18: debug_data_signal <= {19'b0, inst_ren, 7'b0, mem_ren, 3'b0, mem_wen};
+			19: debug_data_signal <= Address_out[31:0];
+			20: debug_data_signal <= Data_out[31:0];
+			21: debug_data_signal <= Data_in[31:0];
+			22: debug_data_signal <= {27'b0, wb_registerWriteAddress[4:0]};
+			23: debug_data_signal <= wb_writeRegData[31:0];
+			default: debug_data_signal <= 32'hFFFF_FFFF;
+		endcase
+	end
+	
+	assign
+		debug_data = debug_addr[5] ? debug_data_signal : debug_data_reg;
+	`endif
+	
     wire [31:0] nextPc;
     wire ex_shouldJumpOrBranch; //control hazard signal
 	Pc U0 (
         .clk(clk), 
         .rst(rst), 
         .id_shouldStall(shouldStall),
-        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch) 
+        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch),
         .nextPc(nextPc[31:0]), 
         .pc(PC_out[31:0])
     );
@@ -46,7 +95,7 @@ module pipeLineCPU(
         .clk(clk), 
         .rst(rst), 
         .id_shouldStall(shouldStall),
-        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch,) 
+        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch), 
         .if_pc_4(if_pc_4[31:0]), 
         .if_instruction(instruction_in[31:0]), 
         .id_pc_4(id_pc_4[31:0]), 
@@ -71,6 +120,10 @@ module pipeLineCPU(
     
    
     IdStage U3 (
+        `ifdef DEBUG
+        debug_addr(debug_addr[4:0]),
+        debug_data_reg(debug_data_reg[31:0]),
+        `endif
         .clk(clk), 
         .rst(rst), 
         .pc_4(id_pc_4[31:0]), 
@@ -83,7 +136,7 @@ module pipeLineCPU(
         .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
-        .registerRtOrZ ero(id_registerRtOrZero[31:0]), 
+        .registerRtOrZero(id_registerRtOrZero[31:0]), 
         .registerRsOrPc_4(id_registerRsOrPc_4[31:0]), 
         .immediate(id_immediate[31:0]), 
         .registerWriteAddress(id_registerWriteAddress[4:0]), 
@@ -130,7 +183,6 @@ module pipeLineCPU(
     );
 
     wire [31:0] ex_aluOutput;
-    wire [31:0] ex_registerRtOrZero;
     wire [31:0] mem_aluOutput;
     // wire [31:0] mem_registerRtOrZero;
 
@@ -174,7 +226,7 @@ module pipeLineCPU(
         .mem_ifWriteRegsFile(mem_ifWriteRegsFile), 
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
-        .mem_memoryData(Data_in[31:0]), 
+        .mem_memoryData(Data_in[31:0]),  // mem_data out
         .mem_aluOutput(Address_out[31:0]), 
         .wb_ifWriteRegsFile(wb_ifWriteRegsFile), 
         .wb_memOutOrAluOutWriteBackToRegFile(wb_memOutOrAluOutWriteBackToRegFile), 

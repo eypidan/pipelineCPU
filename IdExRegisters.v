@@ -29,7 +29,7 @@ module IdExRegisters (
     output reg ex_memOutOrAluOutWriteBackToRegFile = 0,
     output reg ex_aluInput_B_UseRtOrImmeidate = 0,
     output reg ex_shouldJumpOrBranch =0  ,
-    output reg [31:0] ex_jumpOrBranchPc = 0;
+    output reg [31:0] ex_jumpOrBranchPc = 0
 );
 
 	always @(posedge clk) begin

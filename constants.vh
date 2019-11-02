@@ -46,9 +46,3 @@
 `define FUNC_SRL 2 
 `define FUNC_SRA 3
 `define FUNC_JR 8
-
-`define NaN {1'b1, 8'b1111_1111, 1'b1, 22'd0}
-`define INF {1'b0, 8'b1111_1111, 1'b0, 22'd0}
-`define SIGN 31
-`define EXPO 30:23
-`define MANT 22:0
