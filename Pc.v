@@ -10,6 +10,7 @@ module Pc (
 		output reg [31:0] pc = 0
 	);
 	always @(posedge clk) begin
+    
 		if (rst) begin
 			pc <= 0;
 		end else if (cpu_en) begin

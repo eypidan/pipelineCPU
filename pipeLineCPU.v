@@ -1,13 +1,14 @@
 `timescale 1ns / 1ps
 
-`define addr_rs instruction_in[25:21]
-`define addr_rt instruction_in[20:16]
+`define DEBUG
 
 
 module pipeLineCPU(
     `ifdef DEBUG
 	input  [5:0]debug_addr,
 	output [31:0]debug_data,
+    output [31:0]debug_nextPc,
+    output debug_ex_shouldJumpOrBranch,
 	`endif
     input cpu_en,
     input [31:0]instruction_in,
@@ -22,12 +23,47 @@ module pipeLineCPU(
     output [31:0]PC_out,
     output [31:0]Data_out
 );
+
+    wire [31:0] nextPc;
+    wire ex_shouldJumpOrBranch; //control hazard signal
+    wire [31:0] if_pc_4;
+    wire [31:0] id_jumpOrBranchPc; 
+    wire [31:0] ex_jumpOrBranchPc;
+    wire id_shouldJumpOrBranch;
+    wire [31:0] id_pc_4;
+    wire [31:0] id_instruction;
+
+    wire [31:0] id_shiftAmount;
+    wire [31:0] id_immediate;
+    wire [31:0] id_registerRsOrPc_4;
+    wire [31:0] id_registerRtOrZero;
+    wire [3:0] id_aluOperation; 
+    wire [4:0] id_registerWriteAddress;
+    wire [31:0] ex_shiftAmount;
+    wire [31:0] ex_immediate;
+    wire [31:0] ex_registerRsOrPc_4;
+    wire [31:0] ex_registerRtOrZero;
+    wire [3:0] ex_aluOperation;
+    wire [4:0] ex_registerWriteAddress; //deal with data hazard, pass signal too 
+
+    wire [31:0] wb_writeRegData;
+    wire [4:0] mem_registerWriteAddress;
+    wire [31:0] ex_aluOutput;
+    wire [31:0] mem_aluOutput;
+    // wire [31:0] mem_registerRtOrZero;
+    wire [31:0] wb_memoryData;
+    wire [31:0] wb_aluOutput;    
+    wire [4:0]  wb_registerWriteAddress;
+
+
   // debug
 	`ifdef DEBUG
 	wire [31:0] debug_data_reg;
-	reg [31:0] debug_data_signal;
+	reg  [31:0] debug_data_signal;
 	
-
+    assign debug_nextPc = nextPc;
+    wire [4:0] addr_rs =  instruction_in[25:21];
+    wire [4:0] addr_rt = instruction_in[20:16];
 
 	always @(posedge clk) begin
 		case (debug_addr[4:0])
@@ -40,7 +76,7 @@ module pipeLineCPU(
 			6: debug_data_signal <= 0;
 			7: debug_data_signal <= 0;
 			8: debug_data_signal <= {27'b0, addr_rs};
-			9: debug_data_signal <= data_rs;
+			//9: debug_data_signal <= data_rs;
 			10: debug_data_signal <= {27'b0, addr_rt};
 			// 11: debug_data_signal <= data_rt;
 			// 12: debug_data_signal <= data_imm;
@@ -63,8 +99,7 @@ module pipeLineCPU(
 		debug_data = debug_addr[5] ? debug_data_signal : debug_data_reg;
 	`endif
 	
-    wire [31:0] nextPc;
-    wire ex_shouldJumpOrBranch; //control hazard signal
+    
 	Pc U0 (
         .clk(clk), 
         .rst(rst), 
@@ -74,10 +109,7 @@ module pipeLineCPU(
         .pc(PC_out[31:0])
     );
 
-    wire [31:0] if_pc_4;
-    wire [31:0] id_jumpOrBranchPc; 
-    wire [31:0] ex_jumpOrBranchPc;
-    wire id_shouldJumpOrBranch;
+    
 
     IfStage U1 (
         .clk(clk), 
@@ -89,8 +121,7 @@ module pipeLineCPU(
     );
 
 
-    wire [31:0] id_pc_4;
-    wire [31:0] id_instruction;
+    
      
     IfIdRegisters U2 (
         .clk(clk), 
@@ -104,21 +135,7 @@ module pipeLineCPU(
         .id_instruction(id_instruction[31:0])
     );
 
-    wire [31:0] id_shiftAmount;
-    wire [31:0] id_immediate;
-    wire [31:0] id_registerRsOrPc_4;
-    wire [31:0] id_registerRtOrZero;
-    wire [3:0] id_aluOperation; 
-    wire [4:0] id_registerWriteAddress;
-    wire [31:0] ex_shiftAmount;
-    wire [31:0] ex_immediate;
-    wire [31:0] ex_registerRsOrPc_4;
-    wire [31:0] ex_registerRtOrZero;
-    wire [3:0] ex_aluOperation;
-    wire [4:0] ex_registerWriteAddress; //deal with data hazard, pass signal too 
-
-    wire [31:0] wb_writeRegData;
-    wire [4:0] mem_registerWriteAddress;
+    
     
    
     IdStage U3 (
@@ -142,7 +159,7 @@ module pipeLineCPU(
         .registerRsOrPc_4(id_registerRsOrPc_4[31:0]), 
         .immediate(id_immediate[31:0]), 
         .registerWriteAddress(id_registerWriteAddress[4:0]), 
-        .ALU_Opeartion(id_aluOperation[31:0]), 
+        .ALU_Opeartion(id_aluOperation[3:0]), 
         .shouldJumpOrBranch(id_shouldJumpOrBranch), 
         .ifWriteRegsFile(id_ifWriteRegsFile), 
         .ifWriteMem(id_ifWriteMem), 
@@ -185,9 +202,7 @@ module pipeLineCPU(
         .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0])
     );
 
-    wire [31:0] ex_aluOutput;
-    wire [31:0] mem_aluOutput;
-    // wire [31:0] mem_registerRtOrZero;
+    
 
     ExStage U5 (
         .shiftAmount(ex_shiftAmount[31:0]), 
@@ -220,10 +235,7 @@ module pipeLineCPU(
         .mem_registerRtOrZero(Data_out[31:0])
     );
 
-    wire [31:0] wb_memoryData;
-    wire [31:0] wb_aluOutput;    
-    wire [4:0]  wb_registerWriteAddress;
-
+    
     MemWbRegisters U7 (
         .clk(clk), 
         .rst(rst), 
