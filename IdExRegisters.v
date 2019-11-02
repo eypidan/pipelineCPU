@@ -3,6 +3,7 @@
 module IdExRegisters (
     input clk,
     input rst,
+    input cpu_en,
     input id_shouldStall,
     input [31:0] id_shiftAmount,
     input [31:0] id_immediate,
@@ -48,7 +49,7 @@ module IdExRegisters (
             ex_aluInput_B_UseRtOrImmeidate <= 0;
             ex_shouldJumpOrBranch <= 0;
             ex_jumpOrBranchPc <= 0;
-        end else begin
+        end else if(cpu_en) begin
             ex_shiftAmount <= id_shiftAmount;
             ex_immediate <= id_immediate; 
             ex_registerRsOrPc_4 <= id_registerRsOrPc_4;
@@ -63,6 +64,22 @@ module IdExRegisters (
             ex_aluInput_B_UseRtOrImmeidate <= id_aluInput_B_UseRtOrImmeidate;
             ex_shouldJumpOrBranch <= id_shouldJumpOrBranch;
             ex_jumpOrBranchPc <= id_jumpOrBranchPc;
+        end
+        else begin
+            ex_shiftAmount <= ex_shiftAmount;
+            ex_immediate <= ex_immediate; 
+            ex_registerRsOrPc_4 <= ex_registerRsOrPc_4;
+            ex_registerRtOrZero <= ex_registerRtOrZero;
+            ex_aluOperation <= ex_aluOperation;
+            ex_registerWriteAddress <= ex_registerWriteAddress;
+
+            ex_ifWriteRegsFile <= ex_ifWriteRegsFile;
+            ex_ifWriteMem <= ex_ifWriteMem;
+            ex_whileShiftAluInput_A_UseShamt <= ex_whileShiftAluInput_A_UseShamt;
+            ex_memOutOrAluOutWriteBackToRegFile <= ex_memOutOrAluOutWriteBackToRegFile;
+            ex_aluInput_B_UseRtOrImmeidate <= ex_aluInput_B_UseRtOrImmeidate;
+            ex_shouldJumpOrBranch <= ex_shouldJumpOrBranch;
+            ex_jumpOrBranchPc <= ex_jumpOrBranchPc;
         end
     end
 

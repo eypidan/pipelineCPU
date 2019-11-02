@@ -4,7 +4,7 @@ module ExMemRegisters (
 
     input clk,
     input rst,
-
+    input cpu_en,
     input ex_ifWriteRegsFile,
     input ex_ifWriteMem,
     input ex_memOutOrAluOutWriteBackToRegFile,
@@ -33,14 +33,24 @@ module ExMemRegisters (
 			mem_registerWriteAddress <= 0;
 
 		end else begin
+            if(cpu_en) begin
+                mem_ifWriteMem <= ex_ifWriteMem & cpu_en;
+                mem_ifWriteRegsFile <= ex_ifWriteRegsFile;
+                mem_memOutOrAluOutWriteBackToRegFile <= ex_memOutOrAluOutWriteBackToRegFile;
 
-			mem_ifWriteMem <= ex_ifWriteMem;
-			mem_ifWriteRegsFile <= ex_ifWriteRegsFile;
-			mem_memOutOrAluOutWriteBackToRegFile <= ex_memOutOrAluOutWriteBackToRegFile;
+                mem_aluOutput <= ex_aluOutput;
+                mem_registerRtOrZero <= ex_registerRtOrZero;
+                mem_registerWriteAddress <= ex_registerWriteAddress;
+            end
+            else begin
+                mem_ifWriteMem <= mem_ifWriteMem;
+                mem_ifWriteRegsFile <= mem_ifWriteRegsFile;
+                mem_memOutOrAluOutWriteBackToRegFile <= mem_memOutOrAluOutWriteBackToRegFile;
 
-			mem_aluOutput <= ex_aluOutput;
-			mem_registerRtOrZero <= ex_registerRtOrZero;
-			mem_registerWriteAddress <= ex_registerWriteAddress;
+                mem_aluOutput <= mem_aluOutput;
+                mem_registerRtOrZero <= mem_registerRtOrZero;
+                mem_registerWriteAddress <= mem_registerWriteAddress;
+            end
 		end
 	end
 

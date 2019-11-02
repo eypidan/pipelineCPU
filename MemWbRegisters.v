@@ -4,6 +4,7 @@ module MemWbRegisters (
 
 		input clk,
 		input rst,
+        input cpu_en,
         input mem_ifWriteRegsFile,
         input mem_memOutOrAluOutWriteBackToRegFile,
 		input [4:0] mem_registerWriteAddress,
@@ -27,11 +28,20 @@ module MemWbRegisters (
 			wb_aluOutput <= 0;
 
 		end else begin
-			wb_ifWriteRegsFile <= mem_ifWriteRegsFile;
-			wb_memOutOrAluOutWriteBackToRegFile <= mem_memOutOrAluOutWriteBackToRegFile;
-			wb_registerWriteAddress <= mem_registerWriteAddress;
-			wb_memoryData <= mem_memoryData;
-			wb_aluOutput <= mem_aluOutput;
+            if(cpu_en) begin
+                wb_ifWriteRegsFile <= mem_ifWriteRegsFile;
+                wb_memOutOrAluOutWriteBackToRegFile <= mem_memOutOrAluOutWriteBackToRegFile;
+                wb_registerWriteAddress <= mem_registerWriteAddress;
+                wb_memoryData <= mem_memoryData;
+                wb_aluOutput <= mem_aluOutput;
+            end
+            else begin
+                wb_ifWriteRegsFile <= wb_ifWriteRegsFile;
+                wb_memOutOrAluOutWriteBackToRegFile <= wb_memOutOrAluOutWriteBackToRegFile;
+                wb_registerWriteAddress <= wb_registerWriteAddress;
+                wb_memoryData <= wb_memoryData;
+                wb_aluOutput <= wb_aluOutput;
+            end
 		end
 	end
 endmodule

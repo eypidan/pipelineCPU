@@ -9,6 +9,7 @@ module pipeLineCPU(
 	input  [5:0]debug_addr,
 	output [31:0]debug_data,
 	`endif
+    input cpu_en,
     input [31:0]instruction_in,
     input [31:0]Data_in,
     input rst,
@@ -94,6 +95,7 @@ module pipeLineCPU(
     IfIdRegisters U2 (
         .clk(clk), 
         .rst(rst), 
+        .cpu_en(cpu_en),
         .id_shouldStall(shouldStall),
         .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch), 
         .if_pc_4(if_pc_4[31:0]), 
@@ -128,7 +130,7 @@ module pipeLineCPU(
         .rst(rst), 
         .pc_4(id_pc_4[31:0]), 
         .instruction(id_instruction[31:0]), 
-        .wb_RegWrite(wb_ifWriteRegsFile), 
+        .wb_RegWrite(wb_ifWriteRegsFile & cpu_en), 
         .wb_writeRegAddr(wb_registerWriteAddress[4:0]), 
         .wb_writeRegData(wb_writeRegData[31:0]), 
         .ex_shouldWriteRegister(ex_ifWriteRegsFile), 
@@ -153,6 +155,7 @@ module pipeLineCPU(
     IdExRegisters U4 (
         .clk(clk), 
         .rst(rst), 
+        .cpu_en(cpu_en),
         .id_shouldStall(shouldStall),
         .id_shiftAmount(id_shiftAmount[31:0]), 
         .id_immediate(id_immediate[31:0]), 
@@ -202,6 +205,7 @@ module pipeLineCPU(
     ExMemRegisters U6 ( //registerWriteAddress
         .clk(clk), 
         .rst(rst), 
+        .cpu_en(cpu_en),
         .ex_ifWriteRegsFile(ex_ifWriteRegsFile), 
         .ex_ifWriteMem(ex_ifWriteMem), 
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
@@ -223,6 +227,7 @@ module pipeLineCPU(
     MemWbRegisters U7 (
         .clk(clk), 
         .rst(rst), 
+        .cpu_en(cpu_en),
         .mem_ifWriteRegsFile(mem_ifWriteRegsFile), 
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
