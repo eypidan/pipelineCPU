@@ -115,6 +115,6 @@ module IdStage (
     assign immediate = {zeroOrSignExtention ? 16'b0 : {16{instruction[15]}},instruction[15:0]};
 
     `ifdef DEBUG
-    debug_id_ifWriteRegsFile = ifWriteRegsFile;
+    assign debug_id_ifWriteRegsFile = ifWriteRegsFile;
     `endif
 endmodule

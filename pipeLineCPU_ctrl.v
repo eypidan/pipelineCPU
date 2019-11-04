@@ -17,7 +17,6 @@
 //  ==== OPcode ====
 `define CODE_J 2
 `define CODE_JAL 3
-`define CODE_JR 
 `define CODE_R_TYPE 0   
 //I op
 `define CODE_ADDI 8
@@ -148,7 +147,20 @@ module pipeLineCPU_ctrl(
         || OPcode == `CODE_SLTI;
 
     //determine if need to write Register File
-    assign ifWriteRegsFile = (isRType && !jumpRs) || jal ||  writeToRtOrRd; // ?????
+    assign ifWriteRegsFile = ((isRType && (
+				func == `FUNC_ADD
+				|| func == `FUNC_ADDU
+				|| func == `FUNC_SUB
+				|| func == `FUNC_SUBU
+				|| func == `FUNC_AND
+				|| func == `FUNC_OR
+				|| func == `FUNC_XOR
+				|| func == `FUNC_NOR
+				|| func == `FUNC_SLT
+				|| func == `FUNC_SLL
+				|| func == `FUNC_SRL
+				|| func == `FUNC_SRA
+			)) || jal ||  writeToRtOrRd) && (instruction != 0); //BUG ABOUT SLL $ZERO $ZERO 0x0
 
     //deteremine if write mem
     assign ifWriteMem = OPcode == `CODE_SW;

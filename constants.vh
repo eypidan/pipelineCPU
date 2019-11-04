@@ -16,7 +16,6 @@
 //  ==== OPcode ====
 `define CODE_J 2
 `define CODE_JAL 3
-`define CODE_JR 
 `define CODE_R_TYPE 0   
 //I op
 `define CODE_ADDI 8
