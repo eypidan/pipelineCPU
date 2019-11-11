@@ -12,7 +12,8 @@
 `define ALU_SLL  4'b1000
 `define ALU_SRL  4'b1001
 `define ALU_SRA  4'b1010
-`define ALU_NONE 12
+`define ALU_LUI  4'b1011
+`define ALU_NONE 20
 
 //  ==== OPcode ====
 `define CODE_J 2
@@ -114,7 +115,7 @@ module pipeLineCPU_ctrl(
         : OPcode == `CODE_BNE ? `ALU_SUB
         : OPcode == `CODE_LW ? `ALU_ADD
         : OPcode == `CODE_SW ? `ALU_ADD
-        : OPcode == `CODE_LUI ? `ALU_SLL  // ????
+        : OPcode == `CODE_LUI ? `ALU_LUI  // ????
         : `ALU_NONE;
 
     //determine imm'sextention
@@ -122,7 +123,8 @@ module pipeLineCPU_ctrl(
         (OPcode == `CODE_ANDI 
         || OPcode == `CODE_ORI 
         || OPcode == `CODE_XORI 
-        || OPcode == `CODE_ANDI ); // this sigal == 1, zero extention !!!! diff with zhangHaiCPU
+        || OPcode == `CODE_ANDI 
+        || OPcode == `CODE_LUI); // this sigal == 1, zero extention !!!! diff with zhangHaiCPU
 
     //determine ALU B input use rt output or imm extention
     assign aluInput_B_UseRtOrImmeidate = (

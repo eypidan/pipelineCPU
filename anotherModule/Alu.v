@@ -12,7 +12,8 @@
 `define ALU_SLL  4'b1000
 `define ALU_SRL  4'b1001
 `define ALU_SRA  4'b1010
-`define ALU_NONE 12
+`define ALU_LUI  4'b1011
+`define ALU_NONE 20
 
 //  ==== OPcode ====
 `define CODE_J 2
@@ -67,6 +68,7 @@ module Alu (
 			: operation == `ALU_SLL ? inputB << inputA
 			: operation == `ALU_SRL ? inputB >> inputA
 			: operation == `ALU_SRA ? inputB >>> inputA
+            : operation == `ALU_LUI ? {inputB[15:0],16'b0}
 			: 32'b0;
 endmodule
 
