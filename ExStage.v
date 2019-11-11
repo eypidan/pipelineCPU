@@ -1,6 +1,12 @@
 `timescale 1ns / 1ps
-
+`define DEBUG
 module ExStage (
+    `ifdef DEBUG
+    output [31:0]debug_ex_aluOutput,
+    output [31:0]debug_aluInputA,
+    output [31:0]debug_aluInputB,
+    output [3:0]debug_ex_aluOperation,
+    `endif
     input [31:0] shiftAmount,
     input [31:0] immediate,
 
@@ -14,9 +20,18 @@ module ExStage (
     output [31:0] aluOutput
 );
 
-	wire [31:0] aluInputA = whileShiftAluInput_A_UseShamt ? shiftAmount : registerRsOrPc_4;
+    wire [31:0] shift;
+    assign shift[31:0] = {27'b0,immediate[10:6]};
+	wire [31:0] aluInputA = whileShiftAluInput_A_UseShamt ? shift : registerRsOrPc_4;
 	wire [31:0] aluInputB = aluInput_B_UseRtOrImmeidate ? immediate : registerRtOrZero;
 	
+    `ifdef DEBUG
+    assign debug_ex_aluOutput[31:0] = aluOutput[31:0];
+    assign debug_aluInputA[31:0] = aluInputA[31:0];
+    assign debug_aluInputB[31:0] = aluInputB[31:0];
+    assign debug_ex_aluOperation[3:0] = aluOperation[3:0];
+    `endif
+    
 	Alu aluw (
 		.inputA(aluInputA[31:0]),
 		.inputB(aluInputB[31:0]),

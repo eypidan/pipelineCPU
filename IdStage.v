@@ -96,7 +96,7 @@ module IdStage (
     
     //calculate rd,rt,or $ra will be finally write back 
     wire [4:0] RdOrRs;
-    assign RdOrRs = writeToRtOrRd ? instruction[15:11] : instruction[20:16];
+    assign RdOrRs = writeToRtOrRd ?  instruction[20:16]: instruction[15:11];
     assign registerWriteAddress = jal ? 31 : RdOrRs;
     
     //deal witch jump or branch

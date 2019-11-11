@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
-
+`define DEBUG
 module ExMemRegisters (
-
+    
     input clk,
     input rst,
     input cpu_en,

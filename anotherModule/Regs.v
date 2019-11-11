@@ -25,7 +25,7 @@ module Regs(
 	begin   
 		if (rst==1)  
 			for (i=1; i<32; i=i+1)  
-				register[i] <= 32'b0; 		// reset
+				register[i] <= 0; 		// reset
 		else if ((Wt_addr != 0) && (L_S == 1)) 
 				register[Wt_addr] <= Wt_data;      			// write
 	end
