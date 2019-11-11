@@ -10,22 +10,22 @@ module Pc (
 		output reg [31:0] pc = 0
 	);
 	always @(posedge clk) begin
-    
-		if (rst) begin
+
+        if (rst) begin
 			pc <= 0;
-		end else if (cpu_en) begin
-            if (id_shouldStall) begin
-			    pc <= pc;
+        end else if(cpu_en)begin
+           //if cpu_en 
+           if(id_shouldStall) begin
+                pc <= pc;
                 if(ex_shouldJumpOrBranch) begin
-                    pc <= nextPc;
+                    pc[31:0] <= nextPc[31:0];
                 end
-            end else begin
-                pc <= nextPc;
-            end 
+           end else begin
+                pc[31:0] <= nextPc[31:0];
+           end
         end else begin
+            //cpu_en = 0
             pc <= pc;
         end
-        
-	end
-
+    end
 endmodule

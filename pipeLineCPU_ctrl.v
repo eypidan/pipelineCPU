@@ -166,7 +166,7 @@ module pipeLineCPU_ctrl(
     assign ifWriteMem = OPcode == `CODE_SW;
 
     //determine use LW data or Alu result to write back to REG File
-    assign ifWriteMem = OPcode == `CODE_LW;
+    assign memOutOrAluOutWriteBackToRegFile = OPcode == `CODE_LW;
 
     //use shamt[10:6] -> [31:0], input ALU input A
     assign whileShiftAluInput_A_UseShamt = isRType && 

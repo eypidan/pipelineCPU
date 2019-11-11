@@ -13,6 +13,7 @@ module pipeLineCPU(
     output debug_shouldJumpOrBranch,
     output debug_shouldBranch,
     output debug_jump,
+    output [31:0]debug_if_instruction,
     output [31:0]debug_id_instruction,
     output [31:0]debug_ex_instruction,
     output [31:0]debug_mem_instruction,
@@ -74,18 +75,25 @@ module pipeLineCPU(
   // debug
 	`ifdef DEBUG
 	wire [31:0] debug_data_reg;
-    wire [31:0] debug_ex_instruction = ex_instruction;
-    wire [31:0] debug_mem_instruction = mem_instruction;
-    wire [31:0] debug_wb_instruction = wb_instruction;
+    wire [31:0] debug_ex_instruction;
+    wire [31:0] debug_mem_instruction;
+    wire [31:0] debug_wb_instruction;
 	reg  [31:0] debug_data_signal;
 	
-    assign debug_nextPc = nextPc;
+    assign debug_if_instruction[31:0] = instruction_in[31:0];
+    assign debug_wb_instruction[31:0]  = wb_instruction[31:0]; 
+    assign debug_mem_instruction[31:0] = mem_instruction[31:0];
+    assign debug_ex_instruction[31:0]  = ex_instruction[31:0];
+    assign debug_nextPc[31:0] = nextPc[31:0];
+
     assign debug_ex_shouldJumpOrBranch = ex_shouldJumpOrBranch;
     assign debug_shouldStall = shouldStall;
     assign debug_ex_ifWriteRegsFile = ex_ifWriteRegsFile;
 
-    wire [4:0] addr_rs =  instruction_in[25:21];
-    wire [4:0] addr_rt = instruction_in[20:16];
+    wire [4:0] addr_rs ;
+    wire [4:0] addr_rt ;
+    assign  addr_rs[4:0] =  instruction_in[25:21];
+    assign  addr_rt[4:0] = instruction_in[20:16];
 
 	always @(posedge clk) begin
 		case (debug_addr[4:0])
@@ -125,6 +133,7 @@ module pipeLineCPU(
 	Pc U0 (
         .clk(clk), 
         .rst(rst), 
+        .cpu_en(cpu_en),
         .id_shouldStall(shouldStall),
         .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch),
         .nextPc(nextPc[31:0]), 
@@ -145,6 +154,7 @@ module pipeLineCPU(
         .rst(rst), 
         .cpu_en(cpu_en),
         .id_shouldStall(shouldStall),
+        .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
         .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch), 
         .if_pc_4(if_pc_4[31:0]), 
         .if_instruction(instruction_in[31:0]), 
