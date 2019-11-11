@@ -10,7 +10,7 @@ module pipeLineCPU(
     output [31:0]debug_ex_aluOutput,
     output debug_ex_shouldJumpOrBranch,
     output debug_shouldStall,
-    output debug_shouldJumpOrBranch,
+    output debug_id_shouldJumpOrBranch,
     output debug_shouldBranch,
     output debug_jump,
     //instruction
@@ -19,11 +19,14 @@ module pipeLineCPU(
     output [31:0]debug_ex_instruction,
     output [31:0]debug_mem_instruction,
     output [31:0]debug_wb_instruction,
-    output debug_willExStageWriteRs,
     output debug_ex_ifWriteRegsFile,
     output debug_id_ifWriteRegsFile,
     //id stage
     output [4:0] debug_id_registerWriteAddress,
+    output [31:0] debug_id_pc_4,
+    output [31:0] id_jumpOrBranchPc,
+    output [31:0] debug_id_jumpAddress,
+    output [31:0] debug_id_branchAddress,
     //ex stage
     output [31:0]debug_aluInputA,
     output [31:0]debug_aluInputB,
@@ -94,6 +97,7 @@ module pipeLineCPU(
 	reg  [31:0] debug_data_signal;
     //id stage  
     wire [4:0] debug_id_registerWriteAddress;
+    assign debug_id_pc_4[31:0] = id_pc_4[31:0];
     assign debug_id_registerWriteAddress[4:0] = id_registerWriteAddress[4:0];
     //exstage
     wire [31:0] debug_aluInputA;
@@ -188,12 +192,14 @@ module pipeLineCPU(
         `ifdef DEBUG
         .debug_addr(debug_addr[4:0]),
         .debug_data_reg(debug_data_reg[31:0]),
-        .debug_shouldJumpOrBranch(debug_shouldJumpOrBranch),
+        .debug_shouldJumpOrBranch(debug_id_shouldJumpOrBranch),
         .debug_shouldBranch(debug_shouldBranch),
         .debug_id_instruction(debug_id_instruction[31:0]),
         .debug_jump(debug_jump),
         .debug_willExStageWriteRs(debug_willExStageWriteRs),
         .debug_id_ifWriteRegsFile(debug_id_ifWriteRegsFile),
+        .debug_id_jumpAddress(debug_id_jumpAddress[31:0]),
+        .debug_id_branchAddress(debug_id_branchAddress[31:0]),
         `endif
         .clk(clk), 
         .rst(rst), 

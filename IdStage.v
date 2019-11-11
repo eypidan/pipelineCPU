@@ -9,6 +9,8 @@ module IdStage (
     output debug_shouldBranch,
     output debug_jump,
     output [31:0]debug_id_instruction,
+    output [31:0]debug_id_jumpAddress,
+    output [31:0] debug_id_branchAddress,
     output debug_willExStageWriteRs,
     output debug_id_ifWriteRegsFile,
 	`endif
@@ -103,7 +105,8 @@ module IdStage (
     wire [31:0] branchAddress = pc_4 + {{14{instruction[15]}},instruction[15:0],2'b0};
     wire [31:0] jumpAddress = jump ? {pc_4[31:28],instruction[25:0],2'b0} : branchAddress;
     wire [31:0] jumpOrBranchPc = jumpRs ? finalRs : jumpAddress;
-    
+
+
     //calculate if branch, in id stage
     assign ifRsEqualRt = finalRs==finalRt; // equal -> ifRegisterRsRtEqual = 1
     
@@ -116,5 +119,7 @@ module IdStage (
 
     `ifdef DEBUG
     assign debug_id_ifWriteRegsFile = ifWriteRegsFile;
+    assign debug_id_jumpAddress[31:0] = jumpAddress[31:0];
+    assign debug_id_branchAddress[31:0] = branchAddress[31:0];
     `endif
 endmodule

@@ -51,8 +51,13 @@ module IdExRegisters (
                 ex_whileShiftAluInput_A_UseShamt <= 0;
                 ex_memOutOrAluOutWriteBackToRegFile <=0 ;
                 ex_aluInput_B_UseRtOrImmeidate <= 0;
-                ex_shouldJumpOrBranch <= 0;
                 ex_jumpOrBranchPc <= 0;
+                if(id_shouldStall && id_shouldJumpOrBranch)begin
+                    ex_shouldJumpOrBranch <= id_shouldJumpOrBranch;
+                end else begin
+                    ex_shouldJumpOrBranch <= 0;
+                end
+
             end else begin
                 ex_instruction <= id_instruction;
                 ex_shiftAmount <= id_shiftAmount;
