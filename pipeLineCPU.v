@@ -34,6 +34,7 @@ module pipeLineCPU(
     output [31:0]debug_wb_aluOutput,
     output [4:0]debug_wb_registerWriteAddress,
     output debug_memOutOrAluOutWriteBackToRegFile,
+    output debug_wb_ifWriteRegsFile,
 	`endif
     input cpu_en,
     input [31:0]instruction_in,
@@ -90,25 +91,30 @@ module pipeLineCPU(
     wire [31:0] debug_ex_instruction;
     wire [31:0] debug_mem_instruction;
 	reg  [31:0] debug_data_signal;
+    assign debug_if_instruction[31:0] = instruction_in[31:0];
+    assign debug_wb_instruction[31:0]  = wb_instruction[31:0]; 
+    assign debug_mem_instruction[31:0] = mem_instruction[31:0];
+    assign debug_ex_instruction[31:0]  = ex_instruction[31:0];
+    assign debug_nextPc[31:0] = nextPc[31:0];
     //id stage  
     wire [4:0] debug_id_registerWriteAddress;
+    assign debug_shouldStall = shouldStall;
+    assign debug_id_shouldJumpOrBranch = id_shouldJumpOrBranch;
+    assign debug_id_instruction=id_instruction[31:0];
     assign debug_id_pc_4[31:0] = id_pc_4[31:0];
     assign debug_id_registerWriteAddress[4:0] = id_registerWriteAddress[4:0];
     //exstage
     wire [31:0] debug_aluInputA;
     wire [31:0] debug_aluInputB;
     wire [3:0] debug_ex_aluOperation;
+    assign debug_ex_ifWriteRegsFile = ex_ifWriteRegsFile;
     //wb stage
     assign debug_wb_registerWriteAddress[4:0] = wb_registerWriteAddress[4:0];
+    assign debug_wb_ifWriteRegsFile = wb_ifWriteRegsFile;
+    
 
-    assign debug_if_instruction[31:0] = instruction_in[31:0];
-    assign debug_wb_instruction[31:0]  = wb_instruction[31:0]; 
-    assign debug_mem_instruction[31:0] = mem_instruction[31:0];
-    assign debug_ex_instruction[31:0]  = ex_instruction[31:0];
-    assign debug_nextPc[31:0] = nextPc[31:0];
-
-    assign debug_shouldStall = shouldStall;
-    assign debug_ex_ifWriteRegsFile = ex_ifWriteRegsFile;
+    
+    
 
     wire [4:0] addr_rs ;
     wire [4:0] addr_rt ;
@@ -184,9 +190,7 @@ module pipeLineCPU(
         `ifdef DEBUG
         .debug_addr(debug_addr[4:0]),
         .debug_data_reg(debug_data_reg[31:0]),
-        .debug_shouldJumpOrBranch(debug_id_shouldJumpOrBranch),
         .debug_shouldBranch(debug_shouldBranch),
-        .debug_id_instruction(debug_id_instruction[31:0]),
         .debug_jump(debug_jump),
         .debug_willExStageWriteRs(debug_willExStageWriteRs),
         .debug_id_ifWriteRegsFile(debug_id_ifWriteRegsFile),
@@ -197,7 +201,7 @@ module pipeLineCPU(
         .rst(rst), 
         .pc_4(id_pc_4[31:0]), 
         .instruction(id_instruction[31:0]), 
-        .wb_RegWrite(wb_ifWriteRegsFile & cpu_en), 
+        .wb_RegWrite(wb_ifWriteRegsFile), 
         .wb_writeRegAddr(wb_registerWriteAddress[4:0]), 
         .wb_writeRegData(wb_writeRegData[31:0]), 
         .ex_shouldWriteRegister(ex_ifWriteRegsFile), 
