@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 `define DEBUG
 //ALU
-`define ALU_ADD  4'b0000
+`define ALU_ADD  4'b0000  //0
 `define ALU_ADDU 4'b0001
 `define ALU_SUB  4'b0010
-`define ALU_SUBU 4'b0011
+`define ALU_SUBU 4'b0011  //3
 `define ALU_AND  4'b0100
 `define ALU_OR   4'b0101
 `define ALU_XOR  4'b0110
@@ -12,8 +12,10 @@
 `define ALU_SLL  4'b1000
 `define ALU_SRL  4'b1001
 `define ALU_SRA  4'b1010
-`define ALU_LUI  4'b1011
-`define ALU_NONE 20
+`define ALU_LUI  11
+`define ALU_SLTI 12      //12
+`define ALU_SLT  13      //12
+`define ALU_NONE 666
 
 //  ==== OPcode ====
 `define CODE_J 2
@@ -64,6 +66,7 @@ module pipeLineCPU_ctrl(
     input wire mem_shouldWriteRegister,
     input wire [4:0] ex_registerWriteAddress,
     input wire [4:0] mem_registerWriteAddress,
+    input [4:0]registerWriteAddress,
     output wire jal,
     output wire jump,
     output wire jumpRs,
@@ -80,7 +83,7 @@ module pipeLineCPU_ctrl(
     );
 
     
-
+    wire shouldJumpOrBranch_but_wait;
     wire [5:0]OPcode = instruction[31:26];
     wire [5:0]func = instruction[5:0];
     wire isRType = (OPcode[5:0] == `CODE_R_TYPE );
@@ -92,7 +95,7 @@ module pipeLineCPU_ctrl(
     assign jumpRs = isRType && (func == `FUNC_JR);
     //jump or branch
     wire shouldBranch = ( (OPcode == `CODE_BNE) && !ifRsEqualRt ) || ( (OPcode == `CODE_BEQ) && ifRsEqualRt);
-    assign shouldJumpOrBranch = jump || jumpRs || shouldBranch;
+    assign shouldJumpOrBranch_but_wait = jump || jumpRs || shouldBranch;
     
     //ALU_OP_code
     assign ALU_Opeartion = jal ? `ALU_ADD : isRType ? (
@@ -103,7 +106,7 @@ module pipeLineCPU_ctrl(
         : func == `FUNC_AND ? `ALU_AND
         : func == `FUNC_OR ? `ALU_OR
         : func == `FUNC_XOR ? `ALU_XOR
-        : func == `FUNC_SLT ? `ALU_SUB
+        : func == `FUNC_SLT ? `ALU_SLT
         : func == `FUNC_SLL ? `ALU_SLL
         : func == `FUNC_SRL ? `ALU_SRL
 		  : `ALU_NONE
@@ -116,6 +119,7 @@ module pipeLineCPU_ctrl(
         : OPcode == `CODE_LW ? `ALU_ADD
         : OPcode == `CODE_SW ? `ALU_ADD
         : OPcode == `CODE_LUI ? `ALU_LUI  // ????
+        : OPcode == `CODE_SLTI ? `ALU_SLTI
         : `ALU_NONE;
 
     //determine imm'sextention
@@ -183,13 +187,14 @@ module pipeLineCPU_ctrl(
         // shouldJumpOrBranch have already be calculated
     //deal with data hazard
     wire willExStageWriteRs = ex_shouldWriteRegister && ex_registerWriteAddress == rs;
-    wire willExStageWriteRt = ex_shouldWriteRegister && ex_registerWriteAddress == rt;
+    wire willExStageWriteRt = ex_shouldWriteRegister && ex_registerWriteAddress == rt && registerWriteAddress != rt;
     
     //
     wire willMemStageWriteRs = mem_shouldWriteRegister && mem_registerWriteAddress == rs;
-    wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt;
+    wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt && registerWriteAddress != rt;
 
-    assign shouldStall = shouldJumpOrBranch || willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
+    assign shouldStall =  willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
+    assign shouldJumpOrBranch = shouldJumpOrBranch_but_wait & (!shouldStall); //when datahazard is finished(should stall), and then  we can jump
 
     `ifdef DEBUG
     assign debug_shouldJumpOrBranch = shouldJumpOrBranch;

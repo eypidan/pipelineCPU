@@ -31,13 +31,12 @@ module IdExRegisters (
     output reg ex_whileShiftAluInput_A_UseShamt = 0,
     output reg ex_memOutOrAluOutWriteBackToRegFile = 0,
     output reg ex_aluInput_B_UseRtOrImmeidate = 0,
-    output reg ex_shouldJumpOrBranch = 0  ,
     output reg [31:0] ex_jumpOrBranchPc = 0
 );
 
 	always @(posedge clk) begin
         if(cpu_en) begin
-            if(rst || id_shouldStall) begin
+            if(rst || id_shouldStall || id_shouldJumpOrBranch) begin
                 ex_instruction <= 0;
                 ex_shiftAmount <=0 ;
                 ex_immediate <= 0;
@@ -52,11 +51,6 @@ module IdExRegisters (
                 ex_memOutOrAluOutWriteBackToRegFile <=0 ;
                 ex_aluInput_B_UseRtOrImmeidate <= 0;
                 ex_jumpOrBranchPc <= 0;
-                if(id_shouldStall && id_shouldJumpOrBranch)begin
-                    ex_shouldJumpOrBranch <= id_shouldJumpOrBranch;
-                end else begin
-                    ex_shouldJumpOrBranch <= 0;
-                end
 
             end else begin
                 ex_instruction <= id_instruction;
@@ -72,7 +66,6 @@ module IdExRegisters (
                 ex_whileShiftAluInput_A_UseShamt <= id_whileShiftAluInput_A_UseShamt;
                 ex_memOutOrAluOutWriteBackToRegFile <= id_memOutOrAluOutWriteBackToRegFile;
                 ex_aluInput_B_UseRtOrImmeidate <= id_aluInput_B_UseRtOrImmeidate;
-                ex_shouldJumpOrBranch <= id_shouldJumpOrBranch;
                 ex_jumpOrBranchPc <= id_jumpOrBranchPc;
             end
         end else begin
@@ -89,7 +82,6 @@ module IdExRegisters (
             ex_whileShiftAluInput_A_UseShamt <= ex_whileShiftAluInput_A_UseShamt;
             ex_memOutOrAluOutWriteBackToRegFile <= ex_memOutOrAluOutWriteBackToRegFile;
             ex_aluInput_B_UseRtOrImmeidate <= ex_aluInput_B_UseRtOrImmeidate;
-            ex_shouldJumpOrBranch <= ex_shouldJumpOrBranch;
             ex_jumpOrBranchPc <= ex_jumpOrBranchPc;
         end
 

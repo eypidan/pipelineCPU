@@ -1,10 +1,10 @@
 
 `timescale 1ns / 1ps
 //ALU
-`define ALU_ADD  4'b0000
+`define ALU_ADD  4'b0000  //0
 `define ALU_ADDU 4'b0001
 `define ALU_SUB  4'b0010
-`define ALU_SUBU 4'b0011
+`define ALU_SUBU 4'b0011  //3
 `define ALU_AND  4'b0100
 `define ALU_OR   4'b0101
 `define ALU_XOR  4'b0110
@@ -12,8 +12,10 @@
 `define ALU_SLL  4'b1000
 `define ALU_SRL  4'b1001
 `define ALU_SRA  4'b1010
-`define ALU_LUI  4'b1011
-`define ALU_NONE 20
+`define ALU_LUI  11
+`define ALU_SLTI 12      //12
+`define ALU_SLT  13      //12
+`define ALU_NONE 666
 
 //  ==== OPcode ====
 `define CODE_J 2
@@ -55,7 +57,12 @@ module Alu (
     input [3:0] operation,
     output [31:0] result
 	);
+    wire [32:0]A_up = {inputA[31],inputA[31:0]};
+    wire [32:0]B_up = {inputB[31],inputB[31:0]};
 
+    wire [32:0] sltResult;
+    assign sltResult[32:0] = ($signed(A_up) - $signed(B_up)) < 0 ? 1 : 0;
+    //assign sltResult[32:0] = ($signed(A_up) - $signed(B_up)) ;
 	assign result =
 			operation == `ALU_ADD ? $signed(inputA) + $signed(inputB)
 			: operation == `ALU_ADDU ? inputA + inputB
@@ -69,6 +76,8 @@ module Alu (
 			: operation == `ALU_SRL ? inputB >> inputA
 			: operation == `ALU_SRA ? inputB >>> inputA
             : operation == `ALU_LUI ? {inputB[15:0],16'b0}
+            : operation == `ALU_SLTI ? {31'b0,sltResult[0]}
+            : operation == `ALU_SLT ? {31'b0,sltResult[0]}
 			: 32'b0;
 endmodule
 

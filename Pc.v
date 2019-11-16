@@ -17,9 +17,9 @@ module Pc (
            //if cpu_en 
            if(id_shouldStall) begin
                 pc <= pc;
-                if(id_shouldJumpOrBranch) begin
-                    pc[31:0] <= nextPc[31:0];
-                end
+                // if(id_shouldJumpOrBranch) begin
+                //     pc[31:0] <= nextPc[31:0];
+                // end
            end else begin
                 pc[31:0] <= nextPc[31:0];
            end
