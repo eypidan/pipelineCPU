@@ -36,7 +36,7 @@ module IdExRegisters (
 
 	always @(posedge clk) begin
         if(cpu_en) begin
-            if(rst || id_shouldStall || id_shouldJumpOrBranch) begin
+            if(rst || id_shouldStall) begin
                 ex_instruction <= 0;
                 ex_shiftAmount <=0 ;
                 ex_immediate <= 0;
