@@ -18,7 +18,7 @@ module Regs(
 	assign rdata_B = (R_addr_B == 0) ? 0 : register[R_addr_B];   	// read
 
     `ifdef DEBUG
-    assign debug_data_reg = register[debug_addr];
+    assign debug_data_reg = (debug_addr == 0) ? 0 :register[debug_addr];
     `endif
 
 	always @(negedge clk or posedge rst)  // double bump

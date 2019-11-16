@@ -27,7 +27,7 @@ module IdStage (
     input [4:0] ex_registerWriteAddress,
     input [4:0] mem_registerWriteAddress,
 
-    output [31:0] jumpOrBranchPc, // connect to if stage
+    output [31:0] jumpOrBranchPc, // connect to ifstage
     output [31:0] registerRtOrZero,
     output [31:0] registerRsOrPc_4,
     output [31:0] immediate,
@@ -88,13 +88,13 @@ module IdStage (
         .R_addr_B(instruction[20:16]),
         .Wt_addr(wb_writeRegAddr[4:0]), 
         .Wt_data(wb_writeRegData[31:0]), 
-        .rdata_A(rdata_A), 
-        .rdata_B(rdata_B)
+        .rdata_A(rdata_A[31:0]), 
+        .rdata_B(rdata_B[31:0])
     );
     //register final output
     wire [31:0] finalRs,finalRt;
-    assign finalRs[31:0] = rdata_A;
-    assign finalRt[31:0] = rdata_B;
+    assign finalRs[31:0] = rdata_A[31:0];
+    assign finalRt[31:0] = rdata_B[31:0];
     
     //calculate rd,rt,or $ra will be finally write back 
     wire [4:0] RdOrRs;
@@ -103,8 +103,8 @@ module IdStage (
     
     //deal witch jump or branch
     wire [31:0] branchAddress = pc_4 + {{14{instruction[15]}},instruction[15:0],2'b0};
-    wire [31:0] jumpAddress = jump ? {pc_4[31:28],instruction[25:0],2'b0} : branchAddress;
-    wire [31:0] jumpOrBranchPc = jumpRs ? finalRs : jumpAddress;
+    wire [31:0] jumpAddress = jump ? {pc_4[31:28],instruction[25:0],2'b0} : branchAddress[31:0];
+    assign jumpOrBranchPc[31:0] = jumpRs ? finalRs[31:0] : jumpAddress[31:0];
 
 
     //calculate if branch, in id stage

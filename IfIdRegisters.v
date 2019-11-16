@@ -6,7 +6,6 @@ module IfIdRegisters (
         input cpu_en,
 		input id_shouldStall,
         input id_shouldJumpOrBranch,
-        input ex_shouldJumpOrBranch,
 		input [31:0] if_pc_4,
 		input [31:0] if_instruction,
 		output reg [31:0] id_pc_4 = 0,
@@ -21,7 +20,7 @@ module IfIdRegisters (
             if (id_shouldStall) begin
                 id_pc_4 <= id_pc_4;
                 id_instruction <= id_instruction;  // when stall,push bable into next stage
-                if(ex_shouldJumpOrBranch || id_shouldJumpOrBranch) begin
+                if(id_shouldJumpOrBranch) begin
                     id_instruction <= 0; //flushing pipeline
                 end
             end else begin

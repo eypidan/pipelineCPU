@@ -5,7 +5,7 @@ module Pc (
 		input rst,
         input cpu_en,
 		input id_shouldStall,
-        input ex_shouldJumpOrBranch,
+        input id_shouldJumpOrBranch,
 		input [31:0] nextPc,
 		output reg [31:0] pc = 0
 	);
@@ -17,7 +17,7 @@ module Pc (
            //if cpu_en 
            if(id_shouldStall) begin
                 pc <= pc;
-                if(ex_shouldJumpOrBranch) begin
+                if(id_shouldJumpOrBranch) begin
                     pc[31:0] <= nextPc[31:0];
                 end
            end else begin

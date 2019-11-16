@@ -1,14 +1,12 @@
 `timescale 1ns / 1ps
 
 `define DEBUG
-
 module pipeLineCPU(
     `ifdef DEBUG
 	input  [5:0]debug_addr,
 	output [31:0]debug_data,
     output [31:0]debug_nextPc,
     output [31:0]debug_ex_aluOutput,
-    output debug_ex_shouldJumpOrBranch,
     output debug_shouldStall,
     output debug_id_shouldJumpOrBranch,
     output debug_shouldBranch,
@@ -52,9 +50,7 @@ module pipeLineCPU(
 );
 
     wire [31:0] nextPc;
-    wire ex_shouldJumpOrBranch; //control hazard signal
     wire [31:0] if_pc_4;
-    wire [31:0] id_jumpOrBranchPc; 
     wire [31:0] ex_jumpOrBranchPc;
     wire id_shouldJumpOrBranch;
     wire [31:0] id_pc_4;
@@ -93,7 +89,6 @@ module pipeLineCPU(
     //instruction
     wire [31:0] debug_ex_instruction;
     wire [31:0] debug_mem_instruction;
-    wire [31:0] debug_wb_instruction;
 	reg  [31:0] debug_data_signal;
     //id stage  
     wire [4:0] debug_id_registerWriteAddress;
@@ -112,7 +107,6 @@ module pipeLineCPU(
     assign debug_ex_instruction[31:0]  = ex_instruction[31:0];
     assign debug_nextPc[31:0] = nextPc[31:0];
 
-    assign debug_ex_shouldJumpOrBranch = ex_shouldJumpOrBranch;
     assign debug_shouldStall = shouldStall;
     assign debug_ex_ifWriteRegsFile = ex_ifWriteRegsFile;
 
@@ -126,11 +120,11 @@ module pipeLineCPU(
 			0: debug_data_signal <= PC_out[31:0];
 			1: debug_data_signal <= instruction_in[31:0];
 			2: debug_data_signal <= 0;
-			3: debug_data_signal <= 0;
+			3: debug_data_signal <= id_instruction[31:0];
 			4: debug_data_signal <= 0;
-			5: debug_data_signal <= 0;
+			5: debug_data_signal <= ex_instruction[31:0];
 			6: debug_data_signal <= 0;
-			7: debug_data_signal <= 0;
+			7: debug_data_signal <= mem_instruction[31:0];
 			8: debug_data_signal <= {27'b0, addr_rs};
 			//9: debug_data_signal <= data_rs;
 			10: debug_data_signal <= {27'b0, addr_rt};
@@ -138,7 +132,7 @@ module pipeLineCPU(
 			// 12: debug_data_signal <= data_imm;
 			// 13: debug_data_signal <= opa;
 			// 14: debug_data_signal <= opb;
-			// 15: debug_data_signal <= alu_out;
+			15: debug_data_signal <= ex_aluOutput[31:0];
 			16: debug_data_signal <= 0;
 			17: debug_data_signal <= 0;
 			// 18: debug_data_signal <= {19'b0, inst_ren, 7'b0, mem_ren, 3'b0, mem_wen};
@@ -151,8 +145,7 @@ module pipeLineCPU(
 		endcase
 	end
 	
-	assign
-		debug_data = debug_addr[5] ? debug_data_signal : debug_data_reg;
+	assign	debug_data = debug_addr[5] ? debug_data_signal : debug_data_reg;
 	`endif
 	
     
@@ -161,7 +154,7 @@ module pipeLineCPU(
         .rst(rst), 
         .cpu_en(cpu_en),
         .id_shouldStall(shouldStall),
-        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch),
+        .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
         .nextPc(nextPc[31:0]), 
         .pc(PC_out[31:0])
     );
@@ -169,8 +162,8 @@ module pipeLineCPU(
     IfStage U1 (
         .clk(clk), 
         .pc(PC_out[31:0]), 
-        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch), 
-        .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0]), 
+        .id_shouldJumpOrBranch(id_shouldJumpOrBranch), 
+        .id_jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
         .pc_4(if_pc_4[31:0]), 
         .nextPc(nextPc[31:0])
     );
@@ -181,7 +174,6 @@ module pipeLineCPU(
         .cpu_en(cpu_en),
         .id_shouldStall(shouldStall),
         .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
-        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch), 
         .if_pc_4(if_pc_4[31:0]), 
         .if_instruction(instruction_in[31:0]), 
         .id_pc_4(id_pc_4[31:0]), 
@@ -244,7 +236,6 @@ module pipeLineCPU(
         .id_whileShiftAluInput_A_UseShamt(id_whileShiftAluInput_A_UseShamt), 
         .id_memOutOrAluOutWriteBackToRegFile(id_memOutOrAluOutWriteBackToRegFile), 
         .id_aluInput_B_UseRtOrImmeidate(id_aluInput_B_UseRtOrImmeidate), 
-        .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
         .id_jumpOrBranchPc(id_jumpOrBranchPc[31:0]),
         .ex_instruction(ex_instruction[31:0]),
         .ex_shiftAmount(ex_shiftAmount[31:0]), 
@@ -258,7 +249,6 @@ module pipeLineCPU(
         .ex_whileShiftAluInput_A_UseShamt(ex_whileShiftAluInput_A_UseShamt), 
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
         .ex_aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate),
-        .ex_shouldJumpOrBranch(ex_shouldJumpOrBranch),
         .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0])
     );
 
