@@ -208,6 +208,10 @@ module pipeLineCPU(
         .mem_shouldWriteRegister(mem_ifWriteRegsFile), 
         .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
+        //forwarding input signal
+        .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile),
+        .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile),
+
         .jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
         .registerRtOrZero(id_registerRtOrZero[31:0]), 
         .registerRsOrPc_4(id_registerRsOrPc_4[31:0]), 

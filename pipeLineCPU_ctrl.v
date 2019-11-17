@@ -67,6 +67,10 @@ module pipeLineCPU_ctrl(
     input wire [4:0] ex_registerWriteAddress,
     input wire [4:0] mem_registerWriteAddress,
     input [4:0]registerWriteAddress,
+    //forwarding signal
+    input ex_memOutOrAluOutWriteBackToRegFile,
+    input mem_memOutOrAluOutWriteBackToRegFile,
+
     output wire jal,
     output wire jump,
     output wire jumpRs,
@@ -79,7 +83,13 @@ module pipeLineCPU_ctrl(
     output wire memOutOrAluOutWriteBackToRegFile,
     output wire zeroOrSignExtention,
     output wire aluInput_B_UseRtOrImmeidate,
-    output wire shouldStall
+    output wire shouldStall, // this stall signal only contain data hazard
+    output shouldForwardRegisterRsWithExStageAluOutput,
+    output shouldForwardRegisterRsWithMemStageAluOutput,
+    output shouldForwardRegisterRsWithMemStageMemoryData,
+    output shouldForwardRegisterRtWithExStageAluOutput,
+    output shouldForwardRegisterRtWithMemStageAluOutput,
+    output shouldForwardRegisterRtWithMemStageMemoryData
     );
 
     
@@ -195,6 +205,13 @@ module pipeLineCPU_ctrl(
 
     assign shouldStall =  willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
     assign shouldJumpOrBranch = shouldJumpOrBranch_but_wait & (!shouldStall); //when datahazard is finished(should stall), and then  we can jump
+
+    assign shouldForwardRegisterRsWithExStageAluOutput = willExStageWriteRegisterRs && !ex_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRsWithMemStageAluOutput = willMemStageWriteRegisterRs && !mem_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRsWithMemStageMemoryData = willMemStageWriteRegisterRs && mem_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRtWithExStageAluOutput = willExStageWriteRegisterRt && !ex_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRtWithMemStageAluOutput = willMemStageWriteRegisterRt && !mem_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRtWithMemStageMemoryData = willMemStageWriteRegisterRt && mem_memOutOrAluOutWriteBackToRegFile;
 
     `ifdef DEBUG
     assign debug_shouldJumpOrBranch = shouldJumpOrBranch;

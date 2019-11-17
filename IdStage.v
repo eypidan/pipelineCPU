@@ -26,7 +26,9 @@ module IdStage (
     input mem_shouldWriteRegister,
     input [4:0] ex_registerWriteAddress,
     input [4:0] mem_registerWriteAddress,
-    
+    //forwarding signal
+    input ex_memOutOrAluOutWriteBackToRegFile,
+    input mem_memOutOrAluOutWriteBackToRegFile,
 
     output [31:0] jumpOrBranchPc, // connect to ifstage
     output [31:0] registerRtOrZero,
@@ -80,6 +82,13 @@ module IdStage (
     assign debug_id_branchAddress[31:0] = branchAddress[31:0];
     `endif
 
+    wire shouldForwardRegisterRsWithExStageAluOutput;
+	wire shouldForwardRegisterRsWithMemStageAluOutput;
+	wire shouldForwardRegisterRsWithMemStageMemoryData;
+	wire shouldForwardRegisterRtWithExStageAluOutput;
+	wire shouldForwardRegisterRtWithMemStageAluOutput;
+	wire shouldForwardRegisterRtWithMemStageMemoryData;
+
     pipeLineCPU_ctrl pipeLineCPU_ctrl_instance (
         `ifdef DEBUG
         .debug_shouldJumpOrBranch(debug_shouldJumpOrBranch),
@@ -96,6 +105,9 @@ module IdStage (
         .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .registerWriteAddress(registerWriteAddress[4:0]),
+        .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile),
+        .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile),
+
         .jal(jal), 
         .jump(jump), 
         .jumpRs(jumpRs), 
@@ -108,7 +120,13 @@ module IdStage (
         .memOutOrAluOutWriteBackToRegFile(memOutOrAluOutWriteBackToRegFile), 
         .zeroOrSignExtention(zeroOrSignExtention), 
         .aluInput_B_UseRtOrImmeidate(aluInput_B_UseRtOrImmeidate), 
-        .shouldStall(shouldStall)
+        .shouldStall(shouldStall),
+        .shouldForwardRegisterRsWithExStageAluOutput(shouldForwardRegisterRsWithExStageAluOutput),
+		.shouldForwardRegisterRsWithMemStageAluOutput(shouldForwardRegisterRsWithMemStageAluOutput),
+		.shouldForwardRegisterRsWithMemStageMemoryData(shouldForwardRegisterRsWithMemStageMemoryData),
+		.shouldForwardRegisterRtWithExStageAluOutput(shouldForwardRegisterRtWithExStageAluOutput),
+		.shouldForwardRegisterRtWithMemStageAluOutput(shouldForwardRegisterRtWithMemStageAluOutput),
+		.shouldForwardRegisterRtWithMemStageMemoryData(shouldForwardRegisterRtWithMemStageMemoryData)
     );
 
     Regs RegisterInstance (
