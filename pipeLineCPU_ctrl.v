@@ -203,15 +203,18 @@ module pipeLineCPU_ctrl(
     wire willMemStageWriteRs = mem_shouldWriteRegister && mem_registerWriteAddress == rs;
     wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt && registerWriteAddress != rt;
 
-    assign shouldStall =  willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
+    //assign shouldStall =  willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
+    assign shouldStall = ( willExStageWriteRs || willExStageWriteRt) && ex_memOutOrAluOutWriteBackToRegFile;
     assign shouldJumpOrBranch = shouldJumpOrBranch_but_wait & (!shouldStall); //when datahazard is finished(should stall), and then  we can jump
 
-    assign shouldForwardRegisterRsWithExStageAluOutput = willExStageWriteRegisterRs && !ex_memOutOrAluOutWriteBackToRegFile;
-	assign shouldForwardRegisterRsWithMemStageAluOutput = willMemStageWriteRegisterRs && !mem_memOutOrAluOutWriteBackToRegFile;
-	assign shouldForwardRegisterRsWithMemStageMemoryData = willMemStageWriteRegisterRs && mem_memOutOrAluOutWriteBackToRegFile;
-	assign shouldForwardRegisterRtWithExStageAluOutput = willExStageWriteRegisterRt && !ex_memOutOrAluOutWriteBackToRegFile;
-	assign shouldForwardRegisterRtWithMemStageAluOutput = willMemStageWriteRegisterRt && !mem_memOutOrAluOutWriteBackToRegFile;
-	assign shouldForwardRegisterRtWithMemStageMemoryData = willMemStageWriteRegisterRt && mem_memOutOrAluOutWriteBackToRegFile;
+    assign shouldForwardRegisterRsWithExStageAluOutput   = willExStageWriteRs  && !ex_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRsWithMemStageAluOutput  = willMemStageWriteRs && !mem_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRsWithMemStageMemoryData = willMemStageWriteRs && mem_memOutOrAluOutWriteBackToRegFile;//mem_memOutOrAluOutWriteBackToRegFile = 1,lw
+	assign shouldForwardRegisterRtWithExStageAluOutput   = willExStageWriteRt  && !ex_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRtWithMemStageAluOutput  = willMemStageWriteRt && !mem_memOutOrAluOutWriteBackToRegFile;
+	assign shouldForwardRegisterRtWithMemStageMemoryData = willMemStageWriteRt && mem_memOutOrAluOutWriteBackToRegFile;
+
+    
 
     `ifdef DEBUG
     assign debug_shouldJumpOrBranch = shouldJumpOrBranch;

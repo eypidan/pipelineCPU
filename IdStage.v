@@ -13,6 +13,8 @@ module IdStage (
     output [31:0] debug_id_branchAddress,
     output debug_willExStageWriteRs,
     output debug_id_ifWriteRegsFile,
+    output debug_shouldForwardRegisterRs,
+    output debug_shouldForwardRegisterRt,
 	`endif
 
     input clk,
@@ -29,6 +31,9 @@ module IdStage (
     //forwarding signal
     input ex_memOutOrAluOutWriteBackToRegFile,
     input mem_memOutOrAluOutWriteBackToRegFile,
+    input [31:0]ex_aluOutput,
+    input [31:0]mem_aluOutput,
+    input [31:0]mem_memoryData,
 
     output [31:0] jumpOrBranchPc, // connect to ifstage
     output [31:0] registerRtOrZero,
@@ -52,8 +57,7 @@ module IdStage (
     
     //register final output
     wire [31:0] finalRs,finalRt;
-    assign finalRs[31:0] = rdata_A[31:0];
-    assign finalRt[31:0] = rdata_B[31:0];
+    
     
     //calculate rd,rt,or $ra will be finally write back 
     wire [4:0] RdOrRs;
@@ -128,6 +132,21 @@ module IdStage (
 		.shouldForwardRegisterRtWithMemStageAluOutput(shouldForwardRegisterRtWithMemStageAluOutput),
 		.shouldForwardRegisterRtWithMemStageMemoryData(shouldForwardRegisterRtWithMemStageMemoryData)
     );
+
+    assign finalRs[31:0] = 
+        shouldForwardRegisterRsWithExStageAluOutput ? ex_aluOutput[31:0]
+        : shouldForwardRegisterRsWithMemStageAluOutput ? mem_aluOutput[31:0]
+        : shouldForwardRegisterRsWithMemStageMemoryData ? mem_memoryData[31:0]
+        : rdata_A[31:0];
+    
+    assign finalRt[31:0] = 
+        shouldForwardRegisterRtWithExStageAluOutput ? ex_aluOutput[31:0]
+        : shouldForwardRegisterRtWithMemStageAluOutput ? mem_aluOutput[31:0]
+        : shouldForwardRegisterRtWithMemStageMemoryData ? mem_memoryData[31:0]
+        : rdata_B[31:0];
+
+    assign debug_shouldForwardRegisterRs = shouldForwardRegisterRsWithExStageAluOutput || shouldForwardRegisterRsWithMemStageAluOutput || shouldForwardRegisterRsWithMemStageMemoryData;
+	assign debug_shouldForwardRegisterRt = shouldForwardRegisterRtWithExStageAluOutput || shouldForwardRegisterRtWithMemStageAluOutput || shouldForwardRegisterRtWithMemStageMemoryData;
 
     Regs RegisterInstance (
         `ifdef DEBUG

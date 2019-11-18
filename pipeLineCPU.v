@@ -75,7 +75,7 @@ module pipeLineCPU(
     wire [31:0] wb_writeRegData;
     wire [4:0] mem_registerWriteAddress;
     wire [31:0] ex_aluOutput;
-    wire [31:0] mem_aluOutput;
+    
     // wire [31:0] mem_registerRtOrZero;
 
     wire [31:0] wb_instruction;
@@ -108,6 +108,8 @@ module pipeLineCPU(
     wire [31:0] debug_aluInputB;
     wire [3:0] debug_ex_aluOperation;
     assign debug_ex_ifWriteRegsFile = ex_ifWriteRegsFile;
+    //mem
+    wire [31:0] mem_aluOutput;
     //wb stage
     assign debug_wb_registerWriteAddress[4:0] = wb_registerWriteAddress[4:0];
     assign debug_wb_ifWriteRegsFile = wb_ifWriteRegsFile;
@@ -196,6 +198,8 @@ module pipeLineCPU(
         .debug_id_ifWriteRegsFile(debug_id_ifWriteRegsFile),
         .debug_id_jumpAddress(debug_id_jumpAddress[31:0]),
         .debug_id_branchAddress(debug_id_branchAddress[31:0]),
+        .debug_shouldForwardRegisterRs(debug_shouldForwardRegisterRs),
+        .debug_shouldForwardRegisterRt(debug_shouldForwardRegisterRt),
         `endif
         .clk(clk), 
         .rst(rst), 
@@ -211,6 +215,9 @@ module pipeLineCPU(
         //forwarding input signal
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile),
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile),
+        .ex_aluOutput(ex_aluOutput[31:0]),
+        .mem_aluOutput(mem_aluOutput[31:0]),
+        .mem_memoryData(Data_in[31:0]),
 
         .jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
         .registerRtOrZero(id_registerRtOrZero[31:0]), 
@@ -294,7 +301,7 @@ module pipeLineCPU(
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile), 
         .mem_ifWriteMem(mem_ifWriteMem), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
-        .mem_aluOutput(Address_out[31:0]), // PASS sw/lw address to Data Ram
+        .mem_aluOutput(mem_aluOutput[31:0]), // PASS sw/lw address to Data Ram
         .mem_registerRtOrZero(Data_out[31:0])
     );
 
@@ -307,7 +314,7 @@ module pipeLineCPU(
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .mem_memoryData(Data_in[31:0]),  // mem_data out
-        .mem_aluOutput(Address_out[31:0]), 
+        .mem_aluOutput(mem_aluOutput[31:0]), 
         .wb_instruction(wb_instruction[31:0]),
         .wb_ifWriteRegsFile(wb_ifWriteRegsFile), 
         .wb_memOutOrAluOutWriteBackToRegFile(wb_memOutOrAluOutWriteBackToRegFile), 
@@ -315,6 +322,8 @@ module pipeLineCPU(
         .wb_memoryData(wb_memoryData[31:0]), 
         .wb_aluOutput(wb_aluOutput[31:0])
     );
+
+    assign Address_out[31:0] = mem_aluOutput[31:0];
 
     WbStage U8 (
         `ifdef DEBUG
