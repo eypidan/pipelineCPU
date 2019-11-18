@@ -11,7 +11,7 @@ module ExMemRegisters (
     input ex_memOutOrAluOutWriteBackToRegFile,
     input [4:0] ex_registerWriteAddress,
     input [31:0] ex_aluOutput,
-    input [31:0] ex_registerRtOrZero,
+    input [31:0] ex_writeDataToDataRAM,
 
     output reg [31:0] mem_instruction = 0,
     output reg mem_ifWriteRegsFile = 0, 
@@ -19,7 +19,7 @@ module ExMemRegisters (
     output reg mem_ifWriteMem = 0,
     output reg [4:0] mem_registerWriteAddress = 0,
     output reg [31:0] mem_aluOutput = 0, // also need pass to RAM
-    output reg [31:0] mem_registerRtOrZero = 0
+    output reg [31:0] mem_writeDataToDataRAM = 0
 );
 
 	always @(posedge clk) begin
@@ -31,7 +31,7 @@ module ExMemRegisters (
 			mem_memOutOrAluOutWriteBackToRegFile <= 0;
 
 			mem_aluOutput <= 0;
-			mem_registerRtOrZero <= 0;
+			mem_writeDataToDataRAM <= 0;
 			mem_registerWriteAddress <= 0;
             mem_instruction <= 0;
 		end else begin
@@ -41,7 +41,7 @@ module ExMemRegisters (
                 mem_memOutOrAluOutWriteBackToRegFile <= ex_memOutOrAluOutWriteBackToRegFile;
 
                 mem_aluOutput <= ex_aluOutput;
-                mem_registerRtOrZero <= ex_registerRtOrZero;
+                mem_writeDataToDataRAM <= ex_writeDataToDataRAM;
                 mem_registerWriteAddress <= ex_registerWriteAddress;
                 mem_instruction <= ex_instruction;
             end
@@ -51,7 +51,7 @@ module ExMemRegisters (
                 mem_memOutOrAluOutWriteBackToRegFile <= mem_memOutOrAluOutWriteBackToRegFile;
 
                 mem_aluOutput <= mem_aluOutput;
-                mem_registerRtOrZero <= mem_registerRtOrZero;
+                mem_writeDataToDataRAM <= mem_writeDataToDataRAM;
                 mem_registerWriteAddress <= mem_registerWriteAddress;
                 mem_instruction<= mem_instruction;
             end

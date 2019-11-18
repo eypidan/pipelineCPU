@@ -34,6 +34,7 @@ module IdStage (
     input [31:0]ex_aluOutput,
     input [31:0]mem_aluOutput,
     input [31:0]mem_memoryData,
+    input [31:0]ex_instruction,
 
     output [31:0] jumpOrBranchPc, // connect to ifstage
     output [31:0] registerRtOrZero,
@@ -47,7 +48,9 @@ module IdStage (
     output whileShiftAluInput_A_UseShamt,
     output memOutOrAluOutWriteBackToRegFile,
     output aluInput_B_UseRtOrImmeidate,
-    output shouldStall
+    output shouldStall,
+    //forwarding signal
+    output swSignalAndLastRtEqualCurrentRt
 	);
 
     wire MIO_ready; // useless for now
@@ -59,23 +62,10 @@ module IdStage (
     wire [31:0] finalRs,finalRt;
     
     
-    //calculate rd,rt,or $ra will be finally write back 
-    wire [4:0] RdOrRs;
-    assign RdOrRs = writeToRtOrRd ?  instruction[20:16]: instruction[15:11];
-    assign registerWriteAddress[4:0] = jal ? 31 : RdOrRs;
     
-    //deal witch jump or branch
-    wire [31:0] branchAddress = pc_4 + {{14{instruction[15]}},instruction[15:0],2'b0};
-    wire [31:0] jumpAddress = jump ? {pc_4[31:28],instruction[25:0],2'b0} : branchAddress[31:0];
-    assign jumpOrBranchPc[31:0] = jumpRs ? finalRs[31:0] : jumpAddress[31:0];
 
 
-    //calculate if branch, in id stage
-    assign ifRsEqualRt = finalRs==finalRt; // equal -> ifRegisterRsRtEqual = 1
     
-    //---
-    assign registerRtOrZero = jal ? 0 : finalRt;
-    assign registerRsOrPc_4 = jal ? pc_4 : finalRs;
 
     //calculate immediate
     assign immediate = {zeroOrSignExtention ? 16'b0 : {16{instruction[15]}},instruction[15:0]};
@@ -109,8 +99,10 @@ module IdStage (
         .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .registerWriteAddress(registerWriteAddress[4:0]),
+        //forwarding signal
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile),
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile),
+        .ex_instruction(ex_instruction[31:0]),
 
         .jal(jal), 
         .jump(jump), 
@@ -130,7 +122,8 @@ module IdStage (
 		.shouldForwardRegisterRsWithMemStageMemoryData(shouldForwardRegisterRsWithMemStageMemoryData),
 		.shouldForwardRegisterRtWithExStageAluOutput(shouldForwardRegisterRtWithExStageAluOutput),
 		.shouldForwardRegisterRtWithMemStageAluOutput(shouldForwardRegisterRtWithMemStageAluOutput),
-		.shouldForwardRegisterRtWithMemStageMemoryData(shouldForwardRegisterRtWithMemStageMemoryData)
+		.shouldForwardRegisterRtWithMemStageMemoryData(shouldForwardRegisterRtWithMemStageMemoryData),
+        .swSignalAndLastRtEqualCurrentRt(swSignalAndLastRtEqualCurrentRt)
     );
 
     assign finalRs[31:0] = 
@@ -144,6 +137,24 @@ module IdStage (
         : shouldForwardRegisterRtWithMemStageAluOutput ? mem_aluOutput[31:0]
         : shouldForwardRegisterRtWithMemStageMemoryData ? mem_memoryData[31:0]
         : rdata_B[31:0];
+
+    //calculate rd,rt,or $ra will be finally write back 
+    wire [4:0] RdOrRs;
+    assign RdOrRs = writeToRtOrRd ?  instruction[20:16]: instruction[15:11];
+    assign registerWriteAddress[4:0] = jal ? 31 : RdOrRs;
+    
+    //deal witch jump or branch
+    wire [31:0] branchAddress = pc_4 + {{14{instruction[15]}},instruction[15:0],2'b0};
+    wire [31:0] jumpAddress = jump ? {pc_4[31:28],instruction[25:0],2'b0} : branchAddress[31:0];
+    assign jumpOrBranchPc[31:0] = jumpRs ? finalRs[31:0] : jumpAddress[31:0];
+
+
+    //calculate if branch, in id stage
+    assign ifRsEqualRt = finalRs==finalRt; // equal -> ifRegisterRsRtEqual = 1
+    
+    //---
+    assign registerRtOrZero = jal ? 0 : finalRt;
+    assign registerRsOrPc_4 = jal ? pc_4 : finalRs;
 
     assign debug_shouldForwardRegisterRs = shouldForwardRegisterRsWithExStageAluOutput || shouldForwardRegisterRsWithMemStageAluOutput || shouldForwardRegisterRsWithMemStageMemoryData;
 	assign debug_shouldForwardRegisterRt = shouldForwardRegisterRtWithExStageAluOutput || shouldForwardRegisterRtWithMemStageAluOutput || shouldForwardRegisterRtWithMemStageMemoryData;

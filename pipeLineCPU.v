@@ -35,6 +35,10 @@ module pipeLineCPU(
     output [4:0]debug_wb_registerWriteAddress,
     output debug_memOutOrAluOutWriteBackToRegFile,
     output debug_wb_ifWriteRegsFile,
+    //forwarding 
+    output debug_shouldForwardRegisterRs,
+    output debug_shouldForwardRegisterRt,
+    output debug_useForwardingDataFromMemData,
 	`endif
     input cpu_en,
     input [31:0]instruction_in,
@@ -76,14 +80,15 @@ module pipeLineCPU(
     wire [4:0] mem_registerWriteAddress;
     wire [31:0] ex_aluOutput;
     
-    // wire [31:0] mem_registerRtOrZero;
+    // wire [31:0] mem_writeDataToDataRAM;
 
     wire [31:0] wb_instruction;
     wire [31:0] wb_memoryData;
     wire [31:0] wb_aluOutput;    
     wire [4:0]  wb_registerWriteAddress;
-
-
+    //forwarding
+    wire id_swSignalAndLastRtEqualCurrentRt,ex_swSignalAndLastRtEqualCurrentRt;
+    wire [31:0] ex_writeDataToDataRAM;
   // debug
 	`ifdef DEBUG
 	wire [31:0] debug_data_reg;
@@ -218,6 +223,7 @@ module pipeLineCPU(
         .ex_aluOutput(ex_aluOutput[31:0]),
         .mem_aluOutput(mem_aluOutput[31:0]),
         .mem_memoryData(Data_in[31:0]),
+        .ex_instruction(ex_instruction[31:0]),
 
         .jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
         .registerRtOrZero(id_registerRtOrZero[31:0]), 
@@ -231,7 +237,8 @@ module pipeLineCPU(
         .whileShiftAluInput_A_UseShamt(id_whileShiftAluInput_A_UseShamt), 
         .memOutOrAluOutWriteBackToRegFile(id_memOutOrAluOutWriteBackToRegFile), 
         .aluInput_B_UseRtOrImmeidate(id_aluInput_B_UseRtOrImmeidate), 
-        .shouldStall(shouldStall)
+        .shouldStall(shouldStall),
+        .swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt)
     );
 
     IdExRegisters U4 (
@@ -253,6 +260,7 @@ module pipeLineCPU(
         .id_aluInput_B_UseRtOrImmeidate(id_aluInput_B_UseRtOrImmeidate), 
         .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
         .id_jumpOrBranchPc(id_jumpOrBranchPc[31:0]),
+        .id_swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt),
         .ex_instruction(ex_instruction[31:0]),
         .ex_shiftAmount(ex_shiftAmount[31:0]), 
         .ex_immediate(ex_immediate[31:0]), 
@@ -265,7 +273,8 @@ module pipeLineCPU(
         .ex_whileShiftAluInput_A_UseShamt(ex_whileShiftAluInput_A_UseShamt), 
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
         .ex_aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate),
-        .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0])
+        .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0]),
+        .ex_swSignalAndLastRtEqualCurrentRt(ex_swSignalAndLastRtEqualCurrentRt)
     );
 
     ExStage U5 (
@@ -274,6 +283,7 @@ module pipeLineCPU(
         .debug_aluInputA(debug_aluInputA[31:0]),
         .debug_aluInputB(debug_aluInputB[31:0]),
         .debug_ex_aluOperation(debug_ex_aluOperation[3:0]),
+        .debug_useForwardingDataFromMemData(debug_useForwardingDataFromMemData),
         `endif
         .shiftAmount(ex_shiftAmount[31:0]), 
         .immediate(ex_immediate[31:0]), 
@@ -282,7 +292,12 @@ module pipeLineCPU(
         .aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate), 
         .registerRsOrPc_4(ex_registerRsOrPc_4[31:0]), 
         .registerRtOrZero(ex_registerRtOrZero[31:0]), 
-        .aluOutput(ex_aluOutput[31:0])
+        //lw-sw forwarding
+        .ex_swSignalAndLastRtEqualCurrentRt(ex_swSignalAndLastRtEqualCurrentRt),
+        .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile),
+        .mem_memoryData(Data_in[31:0]),
+        .aluOutput(ex_aluOutput[31:0]),
+        .ex_writeDataToDataRAM(ex_writeDataToDataRAM[31:0])
     );
 
     ExMemRegisters U6 ( //registerWriteAddress
@@ -295,14 +310,14 @@ module pipeLineCPU(
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
         .ex_registerWriteAddress(ex_registerWriteAddress[4:0]), 
         .ex_aluOutput(ex_aluOutput[31:0]), 
-        .ex_registerRtOrZero(ex_registerRtOrZero[31:0]), 
+        .ex_writeDataToDataRAM(ex_writeDataToDataRAM[31:0]), 
         .mem_instruction(mem_instruction[31:0]),
         .mem_ifWriteRegsFile(mem_ifWriteRegsFile), 
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile), 
         .mem_ifWriteMem(mem_ifWriteMem), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .mem_aluOutput(mem_aluOutput[31:0]), // PASS sw/lw address to Data Ram
-        .mem_registerRtOrZero(Data_out[31:0])
+        .mem_writeDataToDataRAM(Data_out[31:0])
     );
 
     MemWbRegisters U7 (

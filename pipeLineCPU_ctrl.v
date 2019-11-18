@@ -70,6 +70,7 @@ module pipeLineCPU_ctrl(
     //forwarding signal
     input ex_memOutOrAluOutWriteBackToRegFile,
     input mem_memOutOrAluOutWriteBackToRegFile,
+    input [31:0] ex_instruction,
 
     output wire jal,
     output wire jump,
@@ -84,12 +85,14 @@ module pipeLineCPU_ctrl(
     output wire zeroOrSignExtention,
     output wire aluInput_B_UseRtOrImmeidate,
     output wire shouldStall, // this stall signal only contain data hazard
+    //forwarding
     output shouldForwardRegisterRsWithExStageAluOutput,
     output shouldForwardRegisterRsWithMemStageAluOutput,
     output shouldForwardRegisterRsWithMemStageMemoryData,
     output shouldForwardRegisterRtWithExStageAluOutput,
     output shouldForwardRegisterRtWithMemStageAluOutput,
-    output shouldForwardRegisterRtWithMemStageMemoryData
+    output shouldForwardRegisterRtWithMemStageMemoryData,
+    output swSignalAndLastRtEqualCurrentRt
     );
 
     
@@ -97,7 +100,9 @@ module pipeLineCPU_ctrl(
     wire [5:0]OPcode = instruction[31:26];
     wire [5:0]func = instruction[5:0];
     wire isRType = (OPcode[5:0] == `CODE_R_TYPE );
-
+ 
+    wire [4:0]rs = instruction[25:21]; 
+    wire [4:0]rt = instruction[20:16];
     //j and jal
     assign jump = (OPcode==`CODE_J || OPcode==`CODE_JAL );
     assign jal = OPcode==`CODE_JAL;
@@ -183,16 +188,14 @@ module pipeLineCPU_ctrl(
 
     //determine use LW data or Alu result to write back to REG File
     assign memOutOrAluOutWriteBackToRegFile = OPcode == `CODE_LW;
-
+    assign swSignalAndLastRtEqualCurrentRt = OPcode==`CODE_SW &&  rt[4:0] == ex_instruction[20:16];
     //use shamt[10:6] -> [31:0], input ALU input A
     assign whileShiftAluInput_A_UseShamt = isRType && 
         (func == `FUNC_SLL
         || func == `FUNC_SRL);
     
 
-    //  ==== deal with hazard ==== 
-    wire [4:0]rs = instruction[25:21]; 
-    wire [4:0]rt = instruction[20:16];
+   
     //deal with control hazard
         // shouldJumpOrBranch have already be calculated
     //deal with data hazard
@@ -201,10 +204,12 @@ module pipeLineCPU_ctrl(
     
     //
     wire willMemStageWriteRs = mem_shouldWriteRegister && mem_registerWriteAddress == rs;
-    wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt && registerWriteAddress != rt;
+    wire willMemStageWriteRt = mem_shouldWriteRegister && mem_registerWriteAddress == rt;
 
     //assign shouldStall =  willExStageWriteRs || willExStageWriteRt || willMemStageWriteRs ||willMemStageWriteRt;
-    assign shouldStall = ( willExStageWriteRs || willExStageWriteRt) && ex_memOutOrAluOutWriteBackToRegFile;
+    assign shouldStall = ( willExStageWriteRs || willExStageWriteRt) && ex_memOutOrAluOutWriteBackToRegFile && !(ex_memOutOrAluOutWriteBackToRegFile && swSignalAndLastRtEqualCurrentRt);
+    //(ex_memOutOrAluOutWriteBackToRegFilef && swSignalAndLastRtEqualCurrentRt) is current instruction is sw and last instruction is lw
+
     assign shouldJumpOrBranch = shouldJumpOrBranch_but_wait & (!shouldStall); //when datahazard is finished(should stall), and then  we can jump
 
     assign shouldForwardRegisterRsWithExStageAluOutput   = willExStageWriteRs  && !ex_memOutOrAluOutWriteBackToRegFile;
