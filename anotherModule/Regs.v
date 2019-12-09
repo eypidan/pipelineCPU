@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 `define DEBUG
+
 module Regs(
     `ifdef DEBUG
 	input  [4:0]debug_addr,

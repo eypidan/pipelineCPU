@@ -40,6 +40,8 @@ module pipeLineCPU(
     output debug_shouldForwardRegisterRt,
     output debug_useForwardingDataFromMemData,
 	`endif
+	//interrupt Signal
+	 input [2:0]interruptSignal,
     input cpu_en,
     input [31:0]instruction_in,
     input [31:0]Data_in,
