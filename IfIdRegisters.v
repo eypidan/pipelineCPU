@@ -9,11 +9,13 @@ module IfIdRegisters (
 		input [31:0] if_pc_4,
 		input [31:0] if_instruction,
 		output reg [31:0] id_pc_4 = 0,
-		output reg [31:0] id_instruction = 0
+		output reg [31:0] id_instruction = 0,
+        //cp0 relative
+        input exceptClear
 	);
 
 	always @(posedge clk) begin
-		if (rst) begin
+		if (rst || exceptClear) begin
 			id_pc_4 <= 0;
 			id_instruction <= 0;
 		end else if(cpu_en) begin

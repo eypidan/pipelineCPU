@@ -15,9 +15,13 @@
 `define ALU_LUI  11
 `define ALU_SLTI 12      //12
 `define ALU_SLT  13      //12
+`define ALU_COP0 14
 `define ALU_NONE 666
 
 //  ==== OPcode ====
+//cpu 0
+`define CODE_COP0 16
+
 `define CODE_J 2
 `define CODE_JAL 3
 `define CODE_R_TYPE 0   
@@ -50,6 +54,9 @@
 `define FUNC_SRA 3
 `define FUNC_JR 8
 
+//cp0 function
+`define FUNC_MFC 0
+`define FUNC_MTC 4
 
 module pipeLineCPU_ctrl(
     `ifdef DEBUG
@@ -92,7 +99,11 @@ module pipeLineCPU_ctrl(
     output shouldForwardRegisterRtWithExStageAluOutput,
     output shouldForwardRegisterRtWithMemStageAluOutput,
     output shouldForwardRegisterRtWithMemStageMemoryData,
-    output swSignalAndLastRtEqualCurrentRt
+    output swSignalAndLastRtEqualCurrentRt,
+    //cp0 relative
+    output [2:0]cp_oper,
+    output [2:0]cause,
+    output 
     );
 
     
@@ -100,9 +111,12 @@ module pipeLineCPU_ctrl(
     wire [5:0]OPcode = instruction[31:26];
     wire [5:0]func = instruction[5:0];
     wire isRType = (OPcode[5:0] == `CODE_R_TYPE );
- 
+    wire isCOP0Type = (OPcode[5:0] == `CODE_COP0);
     wire [4:0]rs = instruction[25:21]; 
     wire [4:0]rt = instruction[20:16];
+    //mfc0 and so others
+
+
     //j and jal
     assign jump = (OPcode==`CODE_J || OPcode==`CODE_JAL );
     assign jal = OPcode==`CODE_JAL;
@@ -125,8 +139,8 @@ module pipeLineCPU_ctrl(
         : func == `FUNC_SLL ? `ALU_SLL
         : func == `FUNC_SRL ? `ALU_SRL
 		  : `ALU_NONE
-        )
-		  : OPcode == `CODE_ADDI ? `ALU_ADD
+        ) : isCOP0Type ? `ALU_COP0
+		: OPcode == `CODE_ADDI ? `ALU_ADD
         : OPcode == `CODE_ANDI ? `ALU_AND
         : OPcode == `CODE_ORI ? `ALU_OR
         : OPcode == `CODE_BEQ ? `ALU_SUB

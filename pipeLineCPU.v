@@ -41,7 +41,7 @@ module pipeLineCPU(
     output debug_useForwardingDataFromMemData,
 	`endif
 	//interrupt Signal
-	 input [2:0]interruptSignal,
+	input [2:0]interruptSignal,
     input cpu_en,
     input [31:0]instruction_in,
     input [31:0]Data_in,
@@ -119,11 +119,9 @@ module pipeLineCPU(
     wire [31:0] mem_aluOutput;
     //wb stage
     assign debug_wb_registerWriteAddress[4:0] = wb_registerWriteAddress[4:0];
-    assign debug_wb_ifWriteRegsFile = wb_ifWriteRegsFile;
-    
-
-    
-    
+    assign debug_wb_ifWriteRegsFile = wb_ifWriteRegsFile;    
+    //cp0 need 
+    wire [31:0] jumpAddressExcept;  
 
     wire [4:0] addr_rs ;
     wire [4:0] addr_rt ;
@@ -174,6 +172,7 @@ module pipeLineCPU(
         .pc(PC_out[31:0])
     );
 
+
     IfStage U1 (
         .clk(clk), 
         .pc(PC_out[31:0]), 
@@ -192,9 +191,12 @@ module pipeLineCPU(
         .if_pc_4(if_pc_4[31:0]), 
         .if_instruction(instruction_in[31:0]), 
         .id_pc_4(id_pc_4[31:0]), 
-        .id_instruction(id_instruction[31:0])
+        .id_instruction(id_instruction[31:0]),
+        //cp0 releative
+        .exceptClear(exceptClear)
     );
    
+
     IdStage U3 (
         `ifdef DEBUG
         .debug_addr(debug_addr[4:0]),
@@ -240,7 +242,12 @@ module pipeLineCPU(
         .memOutOrAluOutWriteBackToRegFile(id_memOutOrAluOutWriteBackToRegFile), 
         .aluInput_B_UseRtOrImmeidate(id_aluInput_B_UseRtOrImmeidate), 
         .shouldStall(shouldStall),
-        .swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt)
+        .swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt),
+        //cp0 relative signal
+        .interruptSignal(interruptSignal[2:0]),
+        .epc_ctrl(epc_ctrl),
+        .jumpAddressExcept(jumpAddressExcept[31:0]),
+        .exceptClear(exceptClear)
     );
 
     IdExRegisters U4 (

@@ -50,7 +50,13 @@ module IdStage (
     output aluInput_B_UseRtOrImmeidate,
     output shouldStall,
     //forwarding signal
-    output swSignalAndLastRtEqualCurrentRt
+    output swSignalAndLastRtEqualCurrentRt,
+    //cp0 relative signal
+    input [31:0] except_ret_addr,
+    input [2:0]interruptSignal,
+    output epc_ctrl,
+    output [31:0]jumpAddressExcept,
+    output exceptClear
 	);
 
     wire MIO_ready; // useless for now
@@ -60,12 +66,6 @@ module IdStage (
     
     //register final output
     wire [31:0] finalRs,finalRt;
-    
-    
-    
-
-
-    
 
     //calculate immediate
     assign immediate = {zeroOrSignExtention ? 16'b0 : {16{instruction[15]}},instruction[15:0]};
@@ -136,6 +136,7 @@ module IdStage (
         shouldForwardRegisterRtWithExStageAluOutput ? ex_aluOutput[31:0]
         : shouldForwardRegisterRtWithMemStageAluOutput ? mem_aluOutput[31:0]
         : shouldForwardRegisterRtWithMemStageMemoryData ? mem_memoryData[31:0]
+        : cp0Instruction ? data_readFromCP0[31:0]
         : rdata_B[31:0];
 
     //calculate rd,rt,or $ra will be finally write back 
@@ -172,7 +173,34 @@ module IdStage (
         .Wt_addr(wb_registerWriteAddress[4:0]), 
         .Wt_data(wb_writeRegData[31:0]), 
         .rdata_A(rdata_A[31:0]), 
-        .rdata_B(rdata_B[31:0])
+        .rdata_B(rdata_B[31:0]).
+
+    );
+
+    wire [2:0] cp_oper,cause;
+    wire [4:0] addr_r,addr_w;
+    wire [31:0] data_readFromCP0,data_writeToCP0;
+
+    assign addr_r[4:0] = instruction[15:11];
+    assign addr_w[4:0] = instruction[15:11];
+    assign data_writeToCP0[31:0] = finalRt[31:0];
+
+    cp0 cp0Instance (
+        .clk(clk), 
+        // .debug_addr_cp0(debug_addr_cp0), 
+        // .debug_data_cp0(debug_data_cp0), 
+        .cp_oper(cp_oper[2:0]), 
+        .addr_r(addr_r[4:0]), 
+        .addr_w(addr_w[4:0]), 
+        .data_readFromCP0(data_readFromCP0[31:0]), 
+        .data_writeToCP0(data_writeToCP0[31:0]), 
+        .rst(rst), 
+        .cause(cause[2:0]), 
+        .interruptSignal(interruptSignal[2:0]), 
+        .except_ret_addr(instruction[31:0]),  // id_instruction is the return address
+        .epc_ctrl(epc_ctrl), 
+        .jumpAddressExcept(jumpAddressExcept[31:0]), 
+        .exceptClear(exceptClear)
     );
 
 endmodule

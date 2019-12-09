@@ -15,6 +15,7 @@
 `define ALU_LUI  11
 `define ALU_SLTI 12      //12
 `define ALU_SLT  13      //12
+`define ALU_COP0 14
 `define ALU_NONE 666
 
 //  ==== OPcode ====
@@ -55,7 +56,8 @@ module Alu (
     input [31:0] inputA,
     input [31:0] inputB,
     input [3:0] operation,
-    output [31:0] result
+    output [31:0] result,
+    output overflow
 	);
     wire [32:0]A_up = {inputA[31],inputA[31:0]};
     wire [32:0]B_up = {inputB[31],inputB[31:0]};
@@ -78,6 +80,8 @@ module Alu (
             : operation == `ALU_LUI ? {inputB[15:0],16'b0}
             : operation == `ALU_SLTI ? {31'b0,sltResult[0]}
             : operation == `ALU_SLT ? {31'b0,sltResult[0]}
+            : operation == `ALU_COP0 ? inputB
 			: 32'b0;
+    assign overflow = (operation == `ALU_ADD || operation ==`ALU_SUB) && (result[31] != inputA[31] && inputA[31] == inputB[31]);
 endmodule
 
