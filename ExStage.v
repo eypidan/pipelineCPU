@@ -22,7 +22,9 @@ module ExStage (
     input mem_memOutOrAluOutWriteBackToRegFile, // last if lw
     input [31:0] mem_memoryData,
     output [31:0] aluOutput,
-    output [31:0] ex_writeDataToDataRAM
+    output [31:0] ex_writeDataToDataRAM,
+    //cp0 relative
+    output ex_overflow
 );
 
     wire [31:0] shift;
@@ -47,7 +49,8 @@ module ExStage (
 		.inputA(aluInputA[31:0]),
 		.inputB(aluInputB[31:0]),
 		.operation(aluOperation[3:0]),
-		.result(aluOutput[31:0])
+		.result(aluOutput[31:0]).
+        .overflow(ex_overflow)
 	);
 
 endmodule

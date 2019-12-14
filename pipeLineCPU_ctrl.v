@@ -16,7 +16,7 @@
 `define ALU_SLTI 12      //12
 `define ALU_SLT  13      //12
 `define ALU_COP0 14
-`define ALU_NONE 666
+`define ALU_NONE 15
 
 //  ==== OPcode ====
 //cpu 0
@@ -101,9 +101,10 @@ module pipeLineCPU_ctrl(
     output shouldForwardRegisterRtWithMemStageMemoryData,
     output swSignalAndLastRtEqualCurrentRt,
     //cp0 relative
+    input  [31:0]ex_aluOutput,
     output [2:0]cp_oper,
-    output [2:0]cause,
-    output 
+    output undefined,
+    output outOfMemory
     );
 
     
@@ -111,6 +112,7 @@ module pipeLineCPU_ctrl(
     wire [5:0]OPcode = instruction[31:26];
     wire [5:0]func = instruction[5:0];
     wire isRType = (OPcode[5:0] == `CODE_R_TYPE );
+    
     wire isCOP0Type = (OPcode[5:0] == `CODE_COP0);
     wire [4:0]rs = instruction[25:21]; 
     wire [4:0]rt = instruction[20:16];
@@ -225,7 +227,6 @@ module pipeLineCPU_ctrl(
     //(ex_memOutOrAluOutWriteBackToRegFilef && swSignalAndLastRtEqualCurrentRt) is current instruction is sw and last instruction is lw
 
     assign shouldJumpOrBranch = shouldJumpOrBranch_but_wait & (!shouldStall); //when datahazard is finished(should stall), and then  we can jump
-
     assign shouldForwardRegisterRsWithExStageAluOutput   = willExStageWriteRs  && !ex_memOutOrAluOutWriteBackToRegFile;
 	assign shouldForwardRegisterRsWithMemStageAluOutput  = willMemStageWriteRs && !mem_memOutOrAluOutWriteBackToRegFile;
 	assign shouldForwardRegisterRsWithMemStageMemoryData = willMemStageWriteRs && mem_memOutOrAluOutWriteBackToRegFile;//mem_memOutOrAluOutWriteBackToRegFile = 1,lw
@@ -233,7 +234,14 @@ module pipeLineCPU_ctrl(
 	assign shouldForwardRegisterRtWithMemStageAluOutput  = willMemStageWriteRt && !mem_memOutOrAluOutWriteBackToRegFile;
 	assign shouldForwardRegisterRtWithMemStageMemoryData = willMemStageWriteRt && mem_memOutOrAluOutWriteBackToRegFile;
 
-    
+    //assign wire about cp0
+    // wire isJType = (OPcode[5:0] == `CODE_J || OPcode[5:0] == `CODE_JAL );
+    // wire isIType = OPcode[5:0] == `CODE_ADDI || `CODE_ADDIU || `CODE_ANDI || `CODE_BEQ || `CODE_BNE || 
+    //assign undefined = (!isRType) && (!isCOP0Type) && (!isItype) && (!isJtype);
+    wire undefined = (ALU_Opeartion == `ALU_NONE);
+    wire outOfMemory = (ex_instruction[31:26] == `CODE_LW 
+    || ex_instruction[31:26] == `CODE_SW) 
+    && (ex_aluOutput > 312);  // 312 is the size of data_ram
 
     `ifdef DEBUG
     assign debug_shouldJumpOrBranch = shouldJumpOrBranch;

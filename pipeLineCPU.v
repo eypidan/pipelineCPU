@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
-
 `define DEBUG
+
 module pipeLineCPU(
     `ifdef DEBUG
 	input  [5:0]debug_addr,
@@ -244,6 +244,7 @@ module pipeLineCPU(
         .shouldStall(shouldStall),
         .swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt),
         //cp0 relative signal
+        .overflow(ex_overflow),
         .interruptSignal(interruptSignal[2:0]),
         .epc_ctrl(epc_ctrl),
         .jumpAddressExcept(jumpAddressExcept[31:0]),
@@ -306,7 +307,9 @@ module pipeLineCPU(
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile),
         .mem_memoryData(Data_in[31:0]),
         .aluOutput(ex_aluOutput[31:0]),
-        .ex_writeDataToDataRAM(ex_writeDataToDataRAM[31:0])
+        .ex_writeDataToDataRAM(ex_writeDataToDataRAM[31:0]),
+        //cp0 relative
+        .ex_overflow(ex_overflow)
     );
 
     ExMemRegisters U6 ( //registerWriteAddress

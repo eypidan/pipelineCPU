@@ -58,7 +58,7 @@ module cp0 (
             previousRing<=0;
             exceptClear<=0;
             interrupt<=0;
-            cpr[`EHB_RIGSTER] <= 32'h0000_0200; // make pc = ebh
+            cpr[`EHB_RIGSTER] <= 32'h0000_0024; // make pc = ebh
         end
 
         else begin

@@ -52,6 +52,7 @@ module IdStage (
     //forwarding signal
     output swSignalAndLastRtEqualCurrentRt,
     //cp0 relative signal
+    input overflow,
     input [31:0] except_ret_addr,
     input [2:0]interruptSignal,
     output epc_ctrl,
@@ -123,7 +124,12 @@ module IdStage (
 		.shouldForwardRegisterRtWithExStageAluOutput(shouldForwardRegisterRtWithExStageAluOutput),
 		.shouldForwardRegisterRtWithMemStageAluOutput(shouldForwardRegisterRtWithMemStageAluOutput),
 		.shouldForwardRegisterRtWithMemStageMemoryData(shouldForwardRegisterRtWithMemStageMemoryData),
-        .swSignalAndLastRtEqualCurrentRt(swSignalAndLastRtEqualCurrentRt)
+        .swSignalAndLastRtEqualCurrentRt(swSignalAndLastRtEqualCurrentRt),
+        //cp0 relative
+        .ex_aluOutput(ex_aluOutput[31:0]),
+        .cp_oper(cp_oper[2:0]),
+        .undefined(undefined),
+        .outOfMemory(outOfMemory)
     );
 
     assign finalRs[31:0] = 
@@ -173,8 +179,7 @@ module IdStage (
         .Wt_addr(wb_registerWriteAddress[4:0]), 
         .Wt_data(wb_writeRegData[31:0]), 
         .rdata_A(rdata_A[31:0]), 
-        .rdata_B(rdata_B[31:0]).
-
+        .rdata_B(rdata_B[31:0])
     );
 
     wire [2:0] cp_oper,cause;
@@ -195,7 +200,7 @@ module IdStage (
         .data_readFromCP0(data_readFromCP0[31:0]), 
         .data_writeToCP0(data_writeToCP0[31:0]), 
         .rst(rst), 
-        .cause(cause[2:0]), 
+        .cause({outOfMemory,overflow,undefined}), 
         .interruptSignal(interruptSignal[2:0]), 
         .except_ret_addr(instruction[31:0]),  // id_instruction is the return address
         .epc_ctrl(epc_ctrl), 
