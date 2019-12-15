@@ -15,7 +15,7 @@ module IfIdRegisters (
 	);
 
 	always @(posedge clk) begin
-		if (rst || exceptClear) begin
+		if (rst) begin
 			id_pc_4 <= 0;
 			id_instruction <= 0;
 		end else if(cpu_en) begin
@@ -30,6 +30,12 @@ module IfIdRegisters (
                     id_instruction <= 0; //flushing pipeline
                 end
             end 
+
+            if(exceptClear) begin
+                id_pc_4 <= 0;
+			    id_instruction <= 0;
+            end
+
         end else begin
             id_pc_4 <= id_pc_4;
             id_instruction <= id_instruction;

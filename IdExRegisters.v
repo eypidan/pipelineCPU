@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 
 module IdExRegisters (
+    input exceptClear,
     input clk,
     input rst,
     input cpu_en,
@@ -40,7 +41,7 @@ module IdExRegisters (
 
 	always @(posedge clk) begin
         if(cpu_en) begin
-            if(rst || id_shouldStall) begin
+            if(rst || id_shouldStall || exceptClear) begin
                 ex_instruction <= 0;
                 ex_shiftAmount <=0 ;
                 ex_immediate <= 0;
@@ -52,7 +53,7 @@ module IdExRegisters (
                 ex_ifWriteRegsFile <=0 ;
                 ex_ifWriteMem <= 0;
                 ex_whileShiftAluInput_A_UseShamt <= 0;
-                ex_memOutOrAluOutWriteBackToRegFile <=0 ;
+                ex_memOutOrAluOutWriteBackToRegFile <=0;
                 ex_aluInput_B_UseRtOrImmeidate <= 0;
                 ex_jumpOrBranchPc <= 0;
                 ex_swSignalAndLastRtEqualCurrentRt <= 0;

@@ -190,6 +190,8 @@ module pipeLineCPU(
         .pc(PC_out[31:0]), 
         .id_shouldJumpOrBranch(id_shouldJumpOrBranch), 
         .id_jumpOrBranchPc(id_jumpOrBranchPc[31:0]), 
+        .epc_ctrl(epc_ctrl),
+        .jumpAddressExcept(jumpAddressExcept[31:0]),
         .pc_4(if_pc_4[31:0]), 
         .nextPc(nextPc[31:0])
     );
@@ -278,6 +280,8 @@ module pipeLineCPU(
     );
 
     IdExRegisters U4 (
+        //cp0 releative
+        .exceptClear(exceptClear),
         .clk(clk), 
         .rst(rst), 
         .cpu_en(cpu_en),
@@ -341,6 +345,8 @@ module pipeLineCPU(
     );
 
     ExMemRegisters U6 ( //registerWriteAddress
+    //cp0 releative
+        .exceptClear(exceptClear), 
         .clk(clk), 
         .rst(rst), 
         .cpu_en(cpu_en),

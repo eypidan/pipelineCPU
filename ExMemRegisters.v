@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 `define DEBUG
 module ExMemRegisters (
-    
+    input exceptClear,
     input clk,
     input rst,
     input cpu_en,
@@ -44,7 +44,18 @@ module ExMemRegisters (
                 mem_writeDataToDataRAM <= ex_writeDataToDataRAM;
                 mem_registerWriteAddress <= ex_registerWriteAddress;
                 mem_instruction <= ex_instruction;
+                if(exceptClear) begin
+                    mem_ifWriteMem <= 0;
+                    mem_ifWriteRegsFile <= 0;
+                    mem_memOutOrAluOutWriteBackToRegFile <= 0;
+
+                    mem_aluOutput <= 0;
+                    mem_writeDataToDataRAM <= 0;
+                    mem_registerWriteAddress <= 0;
+                    mem_instruction <= 0;
+                end
             end
+
             else begin
                 mem_ifWriteMem <= mem_ifWriteMem;
                 mem_ifWriteRegsFile <= mem_ifWriteRegsFile;
@@ -55,6 +66,7 @@ module ExMemRegisters (
                 mem_registerWriteAddress <= mem_registerWriteAddress;
                 mem_instruction<= mem_instruction;
             end
+
 		end
 	end
 

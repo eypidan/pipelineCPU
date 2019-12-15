@@ -72,7 +72,6 @@ module IdStage (
     output id_undefined,
     output exceptClear,
     output [31:0]jumpAddressExcept
-    
 	);
 
     wire MIO_ready; // useless for now
@@ -231,7 +230,7 @@ module IdStage (
         .rst(rst), 
         .cause({outOfMemory,ex_overflow,ex_undefined}), 
         .interruptSignal(interruptSignal[2:0]), 
-        .except_ret_addr(pc_4[31:0] - 8),  // id_instruction_address is the return address
+        .except_ret_addr(pc_4[31:0] - 8),  // ex_instruction_address is the return address, ex_instruction_address = pc_4 - 8
         .epc_ctrl(epc_ctrl), 
         .jumpAddressExcept(jumpAddressExcept[31:0]), 
         .exceptClear(exceptClear)

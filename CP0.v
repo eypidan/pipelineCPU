@@ -82,7 +82,7 @@ module cp0 (
                 exception <= 1;
 
                 epc_ctrl <= 1;
-                cpr[`EPC_RIGSTER] <= except_ret_addr; // if exception. the next instruction is the return address
+                cpr[`EPC_RIGSTER] <= except_ret_addr + 4; // if exception. the next instruction is the return address, so we need "+4"
                 jumpAddressExcept <= cpr[`EHB_RIGSTER];
                 mipsRing <= 4;
                 previousRing <= 0;
