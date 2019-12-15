@@ -49,8 +49,8 @@ module ExStage (
 		.inputA(aluInputA[31:0]),
 		.inputB(aluInputB[31:0]),
 		.operation(aluOperation[3:0]),
-		.result(aluOutput[31:0]).
-        .overflow(ex_overflow)
+		.result(aluOutput[31:0]),
+      .overflow(ex_overflow)
 	);
 
 endmodule

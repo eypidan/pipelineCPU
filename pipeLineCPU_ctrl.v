@@ -57,6 +57,10 @@
 //cp0 function
 `define FUNC_MFC 0
 `define FUNC_MTC 4
+`define OP_none 0
+`define OP_mtc 1
+`define OP_mfc 2
+`define OP_eret 3
 
 module pipeLineCPU_ctrl(
     `ifdef DEBUG
@@ -103,11 +107,11 @@ module pipeLineCPU_ctrl(
     //cp0 relative
     input  [31:0]ex_aluOutput,
     output [2:0]cp_oper,
+    output cp0Instruction,
     output undefined,
     output outOfMemory
     );
 
-    
     wire shouldJumpOrBranch_but_wait;
     wire [5:0]OPcode = instruction[31:26];
     wire [5:0]func = instruction[5:0];
@@ -116,6 +120,7 @@ module pipeLineCPU_ctrl(
     wire isCOP0Type = (OPcode[5:0] == `CODE_COP0);
     wire [4:0]rs = instruction[25:21]; 
     wire [4:0]rt = instruction[20:16];
+    wire [4:0]rd = instruction[15:11];
     //mfc0 and so others
 
 
@@ -238,10 +243,23 @@ module pipeLineCPU_ctrl(
     // wire isJType = (OPcode[5:0] == `CODE_J || OPcode[5:0] == `CODE_JAL );
     // wire isIType = OPcode[5:0] == `CODE_ADDI || `CODE_ADDIU || `CODE_ANDI || `CODE_BEQ || `CODE_BNE || 
     //assign undefined = (!isRType) && (!isCOP0Type) && (!isItype) && (!isJtype);
-    wire undefined = (ALU_Opeartion == `ALU_NONE);
-    wire outOfMemory = (ex_instruction[31:26] == `CODE_LW 
+
+    assign undefined = (ALU_Opeartion == `ALU_NONE) && (!jump);
+    assign outOfMemory = (ex_instruction[31:26] == `CODE_LW 
     || ex_instruction[31:26] == `CODE_SW) 
     && (ex_aluOutput > 312);  // 312 is the size of data_ram
+    
+    assign cp_oper = (rs == `FUNC_MFC ? `OP_mfc
+    : rs == `FUNC_MTC ? `OP_mtc
+    : instruction[25] == 1 ? `OP_eret
+    : `OP_none
+    ) & {3{isCOP0Type}};
+    assign cp0Instruction = isCOP0Type && (cp_oper == `OP_mfc);
+    //010000 00000 10000 01100 00000000 000 mfc
+    // COP0  MF    rt    rd, gpr[rt] = cpr[rd]
+
+    //010000 00100 10000 00011 00000000 000 mtc
+    //COP0   MF    rt    rd, cpr[rd] = gpr[rt]
 
     `ifdef DEBUG
     assign debug_shouldJumpOrBranch = shouldJumpOrBranch;
@@ -252,10 +270,3 @@ module pipeLineCPU_ctrl(
     `endif
 
 endmodule
-
-// output wire rsDataBeExeStageAluOutput, // rs here indicate the final output data from 4-1 selector(register rs output) 
-// output wire rsDataBeMemStageAluOutput,
-// output wire rsDataBeMemStageMemOutput,
-// output wire rtDataBeExeStageAluOutput, // rt here indicate the final output data from 4-1 selector(register rt output) 
-// output wire rtDataBeMemStageAluOutput,
-// output wire rtDataBeMemStageMemOutput,

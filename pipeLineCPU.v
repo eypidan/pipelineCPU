@@ -39,6 +39,18 @@ module pipeLineCPU(
     output debug_shouldForwardRegisterRs,
     output debug_shouldForwardRegisterRt,
     output debug_useForwardingDataFromMemData,
+    //cp0 relative
+    output [2:0] debug_cp0_cause,
+    output [2:0] debug_cp0_cp_oper,
+    output [2:0] debug_cp0_interruptSignal,
+    output [31:0] debug_cp0_jumpAddressExcept,
+    output [31:0] debug_cp0_ehb_reg,
+    output [31:0] debug_cp0_epc_reg,
+    output [31:0] debug_cp0_cause_reg,
+    output [31:0] debug_cp0_status_reg,
+    output debug_exception,
+    output debug_interrupt,
+    output [31:0] debug_id_finalRt,
 	`endif
 	//interrupt Signal
 	input [2:0]interruptSignal,
@@ -209,6 +221,17 @@ module pipeLineCPU(
         .debug_id_branchAddress(debug_id_branchAddress[31:0]),
         .debug_shouldForwardRegisterRs(debug_shouldForwardRegisterRs),
         .debug_shouldForwardRegisterRt(debug_shouldForwardRegisterRt),
+        //cp0 relative
+        .debug_cp0_cause(debug_cp0_cause[2:0]),
+        .debug_cp0_cp_oper(debug_cp0_cp_oper[2:0]),
+        .debug_cp0_interruptSignal(debug_cp0_interruptSignal[2:0]),
+        .debug_cp0_jumpAddressExcept(debug_cp0_jumpAddressExcept[31:0]),
+        .debug_cp0_ehb_reg(debug_cp0_ehb_reg[31:0]),
+        .debug_cp0_epc_reg(debug_cp0_epc_reg[31:0]),
+        .debug_cp0_cause_reg(debug_cp0_cause_reg[31:0]),
+        .debug_cp0_status_reg(debug_cp0_status_reg[31:0]),
+        .debug_exception(debug_exception),
+        .debug_interrupt(debug_interrupt),
         `endif
         .clk(clk), 
         .rst(rst), 
@@ -244,11 +267,14 @@ module pipeLineCPU(
         .shouldStall(shouldStall),
         .swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt),
         //cp0 relative signal
-        .overflow(ex_overflow),
+        .ex_undefined(ex_undefined),
+        .ex_overflow(ex_overflow),
         .interruptSignal(interruptSignal[2:0]),
         .epc_ctrl(epc_ctrl),
+        .id_undefined(id_undefined),
         .jumpAddressExcept(jumpAddressExcept[31:0]),
-        .exceptClear(exceptClear)
+        .exceptClear(exceptClear),
+        .debug_id_finalRt(debug_id_finalRt[31:0])
     );
 
     IdExRegisters U4 (
@@ -271,6 +297,7 @@ module pipeLineCPU(
         .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
         .id_jumpOrBranchPc(id_jumpOrBranchPc[31:0]),
         .id_swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt),
+        .id_undefined(id_undefined),
         .ex_instruction(ex_instruction[31:0]),
         .ex_shiftAmount(ex_shiftAmount[31:0]), 
         .ex_immediate(ex_immediate[31:0]), 
@@ -284,7 +311,8 @@ module pipeLineCPU(
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
         .ex_aluInput_B_UseRtOrImmeidate(ex_aluInput_B_UseRtOrImmeidate),
         .ex_jumpOrBranchPc(ex_jumpOrBranchPc[31:0]),
-        .ex_swSignalAndLastRtEqualCurrentRt(ex_swSignalAndLastRtEqualCurrentRt)
+        .ex_swSignalAndLastRtEqualCurrentRt(ex_swSignalAndLastRtEqualCurrentRt),
+        .ex_undefined(ex_undefined)
     );
 
     ExStage U5 (

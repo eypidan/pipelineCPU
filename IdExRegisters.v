@@ -20,6 +20,7 @@ module IdExRegisters (
     input id_shouldJumpOrBranch,
     input [31:0] id_jumpOrBranchPc,
     input id_swSignalAndLastRtEqualCurrentRt,
+    input id_undefined, // cp0 use
     output reg [31:0] ex_instruction = 0,
     output reg [31:0] ex_shiftAmount = 0,
     output reg [31:0] ex_immediate = 0,
@@ -33,7 +34,8 @@ module IdExRegisters (
     output reg ex_memOutOrAluOutWriteBackToRegFile = 0,
     output reg ex_aluInput_B_UseRtOrImmeidate = 0,
     output reg [31:0] ex_jumpOrBranchPc = 0,
-    output reg ex_swSignalAndLastRtEqualCurrentRt = 0
+    output reg ex_swSignalAndLastRtEqualCurrentRt = 0,
+    output reg ex_undefined = 0 
 );
 
 	always @(posedge clk) begin
@@ -54,6 +56,7 @@ module IdExRegisters (
                 ex_aluInput_B_UseRtOrImmeidate <= 0;
                 ex_jumpOrBranchPc <= 0;
                 ex_swSignalAndLastRtEqualCurrentRt <= 0;
+                ex_undefined <= 0;
             end else begin
                 ex_instruction <= id_instruction;
                 ex_shiftAmount <= id_shiftAmount;
@@ -70,6 +73,7 @@ module IdExRegisters (
                 ex_aluInput_B_UseRtOrImmeidate <= id_aluInput_B_UseRtOrImmeidate;
                 ex_jumpOrBranchPc <= id_jumpOrBranchPc;
                 ex_swSignalAndLastRtEqualCurrentRt <= id_swSignalAndLastRtEqualCurrentRt;
+                ex_undefined <= id_undefined;
             end
         end else begin
             ex_instruction <= ex_instruction;
@@ -87,6 +91,7 @@ module IdExRegisters (
             ex_aluInput_B_UseRtOrImmeidate <= ex_aluInput_B_UseRtOrImmeidate;
             ex_jumpOrBranchPc <= ex_jumpOrBranchPc;
             ex_swSignalAndLastRtEqualCurrentRt <= ex_swSignalAndLastRtEqualCurrentRt;
+            ex_undefined <= ex_undefined;
         end
 
     end

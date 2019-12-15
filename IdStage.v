@@ -15,6 +15,18 @@ module IdStage (
     output debug_id_ifWriteRegsFile,
     output debug_shouldForwardRegisterRs,
     output debug_shouldForwardRegisterRt,
+    //cp0 relative
+    output wire [2:0] debug_cp0_cause,
+    output wire [2:0] debug_cp0_cp_oper,
+    output wire [2:0] debug_cp0_interruptSignal,
+    output wire [31:0] debug_cp0_jumpAddressExcept,
+    output wire [31:0] debug_cp0_ehb_reg,
+    output wire [31:0] debug_cp0_epc_reg,
+    output wire [31:0] debug_cp0_cause_reg,
+    output wire [31:0] debug_cp0_status_reg,
+    output wire debug_exception,
+    output wire debug_interrupt,
+    output wire [31:0] debug_id_finalRt,
 	`endif
 
     input clk,
@@ -52,12 +64,15 @@ module IdStage (
     //forwarding signal
     output swSignalAndLastRtEqualCurrentRt,
     //cp0 relative signal
-    input overflow,
+    input ex_undefined,
+    input ex_overflow,
     input [31:0] except_ret_addr,
     input [2:0]interruptSignal,
     output epc_ctrl,
-    output [31:0]jumpAddressExcept,
-    output exceptClear
+    output id_undefined,
+    output exceptClear,
+    output [31:0]jumpAddressExcept
+    
 	);
 
     wire MIO_ready; // useless for now
@@ -75,6 +90,7 @@ module IdStage (
     assign debug_id_ifWriteRegsFile = ifWriteRegsFile;
     assign debug_id_jumpAddress[31:0] = jumpAddress[31:0];
     assign debug_id_branchAddress[31:0] = branchAddress[31:0];
+    assign debug_id_finalRt[31:0] = finalRt[31:0];
     `endif
 
     wire shouldForwardRegisterRsWithExStageAluOutput;
@@ -128,7 +144,8 @@ module IdStage (
         //cp0 relative
         .ex_aluOutput(ex_aluOutput[31:0]),
         .cp_oper(cp_oper[2:0]),
-        .undefined(undefined),
+        .cp0Instruction(cp0Instruction),
+        .undefined(id_undefined),
         .outOfMemory(outOfMemory)
     );
 
@@ -191,6 +208,18 @@ module IdStage (
     assign data_writeToCP0[31:0] = finalRt[31:0];
 
     cp0 cp0Instance (
+        `ifdef DEBUG
+        .debug_cp0_cause(debug_cp0_cause[2:0]),
+        .debug_cp0_cp_oper(debug_cp0_cp_oper[2:0]),
+        .debug_cp0_interruptSignal(debug_cp0_interruptSignal[2:0]),
+        .debug_cp0_jumpAddressExcept(debug_cp0_jumpAddressExcept[31:0]),
+        .debug_cp0_ehb_reg(debug_cp0_ehb_reg[31:0]),
+        .debug_cp0_epc_reg(debug_cp0_epc_reg[31:0]),
+        .debug_cp0_cause_reg(debug_cp0_cause_reg[31:0]),
+        .debug_cp0_status_reg(debug_cp0_status_reg[31:0]),
+        .debug_exception(debug_exception),
+        .debug_interrupt(debug_interrupt),
+        `endif
         .clk(clk), 
         // .debug_addr_cp0(debug_addr_cp0), 
         // .debug_data_cp0(debug_data_cp0), 
@@ -200,9 +229,9 @@ module IdStage (
         .data_readFromCP0(data_readFromCP0[31:0]), 
         .data_writeToCP0(data_writeToCP0[31:0]), 
         .rst(rst), 
-        .cause({outOfMemory,overflow,undefined}), 
+        .cause({outOfMemory,ex_overflow,ex_undefined}), 
         .interruptSignal(interruptSignal[2:0]), 
-        .except_ret_addr(instruction[31:0]),  // id_instruction is the return address
+        .except_ret_addr(pc_4[31:0] - 8),  // id_instruction_address is the return address
         .epc_ctrl(epc_ctrl), 
         .jumpAddressExcept(jumpAddressExcept[31:0]), 
         .exceptClear(exceptClear)

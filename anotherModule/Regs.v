@@ -13,7 +13,7 @@ module Regs(
 );
 
 	reg [31:0] register [1:31]; 		// r1 - r31
-        
+   integer i;
 
 	assign rdata_A = (R_addr_A == 0) ? 0 : register[R_addr_A];	   	// read
 	assign rdata_B = (R_addr_B == 0) ? 0 : register[R_addr_B];   	// read
