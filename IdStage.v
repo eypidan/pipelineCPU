@@ -28,7 +28,7 @@ module IdStage (
     output wire debug_interrupt,
     output wire [31:0] debug_id_finalRt,
 	`endif
-
+    input cpu_en,
     input clk,
     input rst,
     input [31:0] pc_4,
@@ -71,6 +71,7 @@ module IdStage (
     output epc_ctrl,
     output id_undefined,
     output exceptClear,
+    output eret_clearSignal,
     output [31:0]jumpAddressExcept
 	);
 
@@ -220,8 +221,7 @@ module IdStage (
         .debug_interrupt(debug_interrupt),
         `endif
         .clk(clk), 
-        // .debug_addr_cp0(debug_addr_cp0), 
-        // .debug_data_cp0(debug_data_cp0), 
+        .cpu_en(cpu_en),
         .cp_oper(cp_oper[2:0]), 
         .addr_r(addr_r[4:0]), 
         .addr_w(addr_w[4:0]), 
@@ -233,7 +233,8 @@ module IdStage (
         .except_ret_addr(pc_4[31:0] - 8),  // ex_instruction_address is the return address, ex_instruction_address = pc_4 - 8
         .epc_ctrl(epc_ctrl), 
         .jumpAddressExcept(jumpAddressExcept[31:0]), 
-        .exceptClear(exceptClear)
+        .exceptClear(exceptClear),
+        .eret_clearSignal(eret_clearSignal)
     );
 
 endmodule

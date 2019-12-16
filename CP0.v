@@ -33,6 +33,7 @@ module cp0 (
     output wire debug_interrupt,
 	`endif
 	// operations (read in ID stage and write in EXE stage)
+    input wire cpu_en,
 	input wire [2:0] cp_oper,  // CP0 operation type
 	input wire [4:0] addr_r,  // read address
 	output reg [31:0] data_readFromCP0,  // read data
@@ -45,7 +46,8 @@ module cp0 (
 	input wire [31:0] except_ret_addr,  // target instruction address to store when interrupt occurred
 	output reg epc_ctrl,  // force jump enable signal when interrupt authorised or ERET occurred
 	output reg [31:0] jumpAddressExcept,  // target instruction address to jump to
-    output reg exceptClear
+    output reg exceptClear,
+    output reg eret_clearSignal
 	);
 
     wire [31:0] status = cpr[`STATUS_RIGSTER];
@@ -72,10 +74,12 @@ module cp0 (
             exceptClear<=0;
             interrupt<=0;
             cpr[`EHB_RIGSTER] <= 32'h0000_0024; // make pc = ebh
-            jumpAddressExcept <= cpr[`EHB_RIGSTER];
+            jumpAddressExcept <= 0;
+            eret_clearSignal<=0;
         end
 
         else begin
+            eret_clearSignal <= 0;
         //deal with exception
             if(cause != 0 && status[15:8] == 8'hff) begin
                 cpr[`CAUSE_RIGSTER] <= cause[2:0]; 
@@ -95,14 +99,17 @@ module cp0 (
             //deal with interrupt
             if(interruptSignal > mipsRing && status[15:8] == 8'hff) begin //interruptSignal = 0,1,2,3  mipsRing = 0,1,2,3,4
                 epc_ctrl <= 1;
-                cpr[`EPC_RIGSTER] <= except_ret_addr; // if interrupt
+                cpr[`EPC_RIGSTER] <= except_ret_addr;    // if interrupt
                 jumpAddressExcept <= cpr[`EHB_RIGSTER];
+                previousRing <= mipsRing;
                 mipsRing <= interruptSignal;
                 interrupt<= 1;
             end 
             else begin
-                interrupt <= 0;
-                epc_ctrl <= 0;
+                if(exception == 0) begin
+                    interrupt <= 0;
+                    epc_ctrl <= 0;
+                end
             end       
 
             //excute the cp0 instruction
@@ -113,7 +120,8 @@ module cp0 (
             end else if(cp_oper == `OP_eret)begin
                 jumpAddressExcept <= cpr[`EPC_RIGSTER];
                 epc_ctrl <= 1;
-                if(mipsRing == 4) mipsRing<= 0;
+                mipsRing<= previousRing;
+                eret_clearSignal <= 1;
             end 
 
             exceptClear <= exception || interrupt; 
@@ -132,6 +140,7 @@ module cp0 (
     assign debug_cp0_cause_reg[31:0] = cpr[`CAUSE_RIGSTER];
     assign debug_cp0_status_reg[31:0] = cpr[`STATUS_RIGSTER];
     `endif
-
+    
+//01000000100100010110000000000000
 
 endmodule

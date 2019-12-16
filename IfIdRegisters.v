@@ -4,6 +4,7 @@ module IfIdRegisters (
 		input clk,
 		input rst,
         input cpu_en,
+        input eret_clearSignal,
 		input id_shouldStall,
         input id_shouldJumpOrBranch,
 		input [31:0] if_pc_4,
@@ -31,7 +32,7 @@ module IfIdRegisters (
                 end
             end 
 
-            if(exceptClear) begin
+            if(exceptClear || eret_clearSignal) begin
                 id_pc_4 <= 0;
 			    id_instruction <= 0;
             end

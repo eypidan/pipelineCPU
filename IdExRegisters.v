@@ -2,6 +2,7 @@
 
 module IdExRegisters (
     input exceptClear,
+    input eret_clearSignal,
     input clk,
     input rst,
     input cpu_en,
@@ -41,7 +42,7 @@ module IdExRegisters (
 
 	always @(posedge clk) begin
         if(cpu_en) begin
-            if(rst || id_shouldStall || exceptClear) begin
+            if(rst || id_shouldStall || exceptClear || eret_clearSignal) begin
                 ex_instruction <= 0;
                 ex_shiftAmount <=0 ;
                 ex_immediate <= 0;

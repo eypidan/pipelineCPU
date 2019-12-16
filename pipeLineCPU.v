@@ -51,6 +51,7 @@ module pipeLineCPU(
     output debug_exception,
     output debug_interrupt,
     output [31:0] debug_id_finalRt,
+    output debug_cp0_epc_ctrl,
 	`endif
 	//interrupt Signal
 	input [2:0]interruptSignal,
@@ -171,6 +172,8 @@ module pipeLineCPU(
 	end
 	
 	assign	debug_data = debug_addr[5] ? debug_data_signal : debug_data_reg;
+    //cp0 relative
+    assign debug_cp0_epc_ctrl = epc_ctrl;
 	`endif
 	
     
@@ -200,6 +203,7 @@ module pipeLineCPU(
         .clk(clk), 
         .rst(rst), 
         .cpu_en(cpu_en),
+        .eret_clearSignal(eret_clearSignal),
         .id_shouldStall(shouldStall),
         .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
         .if_pc_4(if_pc_4[31:0]), 
@@ -235,6 +239,7 @@ module pipeLineCPU(
         .debug_exception(debug_exception),
         .debug_interrupt(debug_interrupt),
         `endif
+        .cpu_en(cpu_en),
         .clk(clk), 
         .rst(rst), 
         .pc_4(id_pc_4[31:0]), 
@@ -276,12 +281,14 @@ module pipeLineCPU(
         .id_undefined(id_undefined),
         .jumpAddressExcept(jumpAddressExcept[31:0]),
         .exceptClear(exceptClear),
+        .eret_clearSignal(eret_clearSignal),
         .debug_id_finalRt(debug_id_finalRt[31:0])
     );
 
     IdExRegisters U4 (
         //cp0 releative
         .exceptClear(exceptClear),
+        .eret_clearSignal(eret_clearSignal),
         .clk(clk), 
         .rst(rst), 
         .cpu_en(cpu_en),

@@ -186,7 +186,9 @@ module pipeLineCPU_ctrl(
         || OPcode == `CODE_ORI
         || OPcode == `CODE_LW
         || OPcode == `CODE_LUI
-        || OPcode == `CODE_SLTI;
+        || OPcode == `CODE_SLTI
+        || (isCOP0Type && (instruction[25:21] == `FUNC_MFC));
+    
 
     //determine if need to write Register File
     assign ifWriteRegsFile = ((isRType && (
