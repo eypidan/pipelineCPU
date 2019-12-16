@@ -61,7 +61,6 @@ module cp0 (
     // mipsRing = 4 exception mipsRing, highest priority
     reg [2:0] mipsRing; 
     reg [2:0] previousRing;
-
  
     always@(posedge clk or posedge rst)begin
         if(rst) begin
@@ -92,21 +91,24 @@ module cp0 (
                 previousRing <= 0;
             end               
             else begin
-                exception <= 0;
-                epc_ctrl <= 0;
+                if(cpu_en)begin
+                    exception <= 0;
+                    epc_ctrl <= 0;
+                end
             end               
             
             //deal with interrupt
             if(interruptSignal > mipsRing && status[15:8] == 8'hff) begin //interruptSignal = 0,1,2,3  mipsRing = 0,1,2,3,4
                 epc_ctrl <= 1;
-                cpr[`EPC_RIGSTER] <= except_ret_addr;    // if interrupt
+                cpr[`EPC_RIGSTER] <= except_ret_addr + 4;    // if interrupt
                 jumpAddressExcept <= cpr[`EHB_RIGSTER];
                 previousRing <= mipsRing;
                 mipsRing <= interruptSignal;
                 interrupt<= 1;
+              
             end 
             else begin
-                if(exception == 0) begin
+                if(exception == 0 && cpu_en) begin
                     interrupt <= 0;
                     epc_ctrl <= 0;
                 end
