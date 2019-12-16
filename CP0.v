@@ -100,7 +100,7 @@ module cp0 (
             //deal with interrupt
             if(interruptSignal > mipsRing && status[15:8] == 8'hff) begin //interruptSignal = 0,1,2,3  mipsRing = 0,1,2,3,4
                 epc_ctrl <= 1;
-                cpr[`EPC_RIGSTER] <= except_ret_addr + 4;    // if interrupt
+                cpr[`EPC_RIGSTER] <= except_ret_addr;    // if interrupt
                 jumpAddressExcept <= cpr[`EHB_RIGSTER];
                 previousRing <= mipsRing;
                 mipsRing <= interruptSignal;
