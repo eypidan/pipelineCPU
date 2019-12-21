@@ -31,6 +31,7 @@ module cp0 (
     output wire [31:0] debug_cp0_status_reg,
     output wire debug_exception,
     output wire debug_interrupt,
+    output wire [2:0] debug_cp0_ring,
 	`endif
 	// operations (read in ID stage and write in EXE stage)
     input wire cpu_en,
@@ -39,6 +40,7 @@ module cp0 (
 	output reg [31:0] data_readFromCP0,  // read data
 	input wire [4:0] addr_w,  // write address
 	input wire [31:0] data_writeToCP0,  // write data
+    input wire [31:0] ex_instruction,
 	// control signal
 	input wire rst,  // synchronous reset
 	input wire [2:0]cause,            // internal exception input
@@ -61,6 +63,7 @@ module cp0 (
     // mipsRing = 4 exception mipsRing, highest priority
     reg [2:0] mipsRing; 
     reg [2:0] previousRing;
+    reg [2:0] ppriviousRing;
  
     always@(posedge clk or posedge rst)begin
         if(rst) begin
@@ -70,6 +73,7 @@ module cp0 (
             exception <= 0;
             mipsRing <= 0;
             previousRing<=0;
+            ppriviousRing <= 0;
             exceptClear<=0;
             interrupt<=0;
             cpr[`EHB_RIGSTER] <= 32'h0000_0024; // make pc = ebh
@@ -78,7 +82,7 @@ module cp0 (
         end
 
         else begin
-            eret_clearSignal <= 0;
+            
         //deal with exception
             if(cause != 0 && status[15:8] == 8'hff) begin
                 cpr[`CAUSE_RIGSTER] <= cause[2:0]; 
@@ -94,14 +98,17 @@ module cp0 (
                 if(cpu_en)begin
                     exception <= 0;
                     epc_ctrl <= 0;
+                    eret_clearSignal <= 0;
                 end
             end               
             
             //deal with interrupt
             if(interruptSignal > mipsRing && status[15:8] == 8'hff) begin //interruptSignal = 0,1,2,3  mipsRing = 0,1,2,3,4
                 epc_ctrl <= 1;
-                cpr[`EPC_RIGSTER] <= except_ret_addr;    // if interrupt
+
+                cpr[`EPC_RIGSTER] <= except_ret_addr + 4;    // if interrupt
                 jumpAddressExcept <= cpr[`EHB_RIGSTER];
+                ppriviousRing <= previousRing;
                 previousRing <= mipsRing;
                 mipsRing <= interruptSignal;
                 interrupt<= 1;
@@ -110,7 +117,8 @@ module cp0 (
             else begin
                 if(exception == 0 && cpu_en) begin
                     interrupt <= 0;
-                    epc_ctrl <= 0;
+                    epc_ctrl<=0;
+                    eret_clearSignal <= 0;
                 end
             end       
 
@@ -122,15 +130,20 @@ module cp0 (
             end else if(cp_oper == `OP_eret)begin
                 jumpAddressExcept <= cpr[`EPC_RIGSTER];
                 epc_ctrl <= 1;
-                mipsRing<= previousRing;
+                mipsRing <= previousRing;
+                previousRing <= ppriviousRing;
                 eret_clearSignal <= 1;
             end 
-
+            // else begin
+            //     epc_ctrl <= 0;
+            // end
+        
             exceptClear <= exception || interrupt; 
         end
     end
 
     `ifdef DEBUG
+    assign debug_cp0_ring[2:0] = mipsRing[2:0];
     assign debug_cp0_cause[2:0] = cause[2:0];
     assign debug_cp0_cp_oper[2:0] = cp_oper[2:0];
     assign debug_cp0_interruptSignal[2:0] = interruptSignal[2:0];

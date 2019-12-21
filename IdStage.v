@@ -27,6 +27,7 @@ module IdStage (
     output wire debug_exception,
     output wire debug_interrupt,
     output wire [31:0] debug_id_finalRt,
+    output wire [2:0] debug_cp0_ring,
 	`endif
     input cpu_en,
     input clk,
@@ -66,7 +67,6 @@ module IdStage (
     //cp0 relative signal
     input ex_undefined,
     input ex_overflow,
-    input [31:0] except_ret_addr,
     input [2:0]interruptSignal,
     output epc_ctrl,
     output id_undefined,
@@ -219,6 +219,7 @@ module IdStage (
         .debug_cp0_status_reg(debug_cp0_status_reg[31:0]),
         .debug_exception(debug_exception),
         .debug_interrupt(debug_interrupt),
+        .debug_cp0_ring(debug_cp0_ring[2:0]),
         `endif
         .clk(clk), 
         .cpu_en(cpu_en),
@@ -227,6 +228,7 @@ module IdStage (
         .addr_w(addr_w[4:0]), 
         .data_readFromCP0(data_readFromCP0[31:0]), 
         .data_writeToCP0(data_writeToCP0[31:0]), 
+        .ex_instruction(ex_instruction[31:0]),
         .rst(rst), 
         .cause({outOfMemory,ex_overflow,ex_undefined}), 
         .interruptSignal(interruptSignal[2:0]), 

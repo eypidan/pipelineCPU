@@ -52,6 +52,9 @@ module pipeLineCPU(
     output debug_interrupt,
     output [31:0] debug_id_finalRt,
     output debug_cp0_epc_ctrl,
+    output debug_eret_clearSignal,
+    output [2:0]debug_cp0_ring,
+    output [31:0]debug_cp0_except_ret_addr,
 	`endif
 	//interrupt Signal
 	input [2:0]interruptSignal,
@@ -140,7 +143,8 @@ module pipeLineCPU(
     wire [4:0] addr_rt ;
     assign  addr_rs[4:0] =  instruction_in[25:21];
     assign  addr_rt[4:0] = instruction_in[20:16];
-
+    assign debug_eret_clearSignal = eret_clearSignal;
+    
 	always @(posedge clk) begin
 		case (debug_addr[4:0])
 			0: debug_data_signal <= PC_out[31:0];
@@ -174,6 +178,7 @@ module pipeLineCPU(
 	assign	debug_data = debug_addr[5] ? debug_data_signal : debug_data_reg;
     //cp0 relative
     assign debug_cp0_epc_ctrl = epc_ctrl;
+    assign debug_cp0_except_ret_addr[31:0] = id_pc_4[31:0] - 8;
 	`endif
 	
     
@@ -282,7 +287,8 @@ module pipeLineCPU(
         .jumpAddressExcept(jumpAddressExcept[31:0]),
         .exceptClear(exceptClear),
         .eret_clearSignal(eret_clearSignal),
-        .debug_id_finalRt(debug_id_finalRt[31:0])
+        .debug_id_finalRt(debug_id_finalRt[31:0]),
+        .debug_cp0_ring(debug_cp0_ring[2:0])
     );
 
     IdExRegisters U4 (
