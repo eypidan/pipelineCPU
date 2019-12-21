@@ -34,6 +34,8 @@ module IdStage (
     input rst,
     input [31:0] pc_4,
     input [31:0] instruction,
+    input [31:0] id_pc,
+    input [31:0] ex_pc,
     input wb_RegWrite,  //wb_ means from wb
     input [4:0] wb_registerWriteAddress,
     input [31:0]wb_writeRegData,
@@ -232,7 +234,8 @@ module IdStage (
         .rst(rst), 
         .cause({outOfMemory,ex_overflow,ex_undefined}), 
         .interruptSignal(interruptSignal[2:0]), 
-        .except_ret_addr(pc_4[31:0] - 8),  // ex_instruction_address is the return address, ex_instruction_address = pc_4 - 8
+        .id_pc(id_pc[31:0]),
+        .ex_pc(ex_pc[31:0]),
         .epc_ctrl(epc_ctrl), 
         .jumpAddressExcept(jumpAddressExcept[31:0]), 
         .exceptClear(exceptClear),

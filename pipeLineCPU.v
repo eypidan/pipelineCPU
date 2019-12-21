@@ -17,6 +17,7 @@ module pipeLineCPU(
     output [31:0]debug_ex_instruction,
     output [31:0]debug_mem_instruction,
     output [31:0]debug_wb_instruction,
+    output [31:0] debug_ex_pc,
     output debug_ex_ifWriteRegsFile,
     output debug_id_ifWriteRegsFile,
     //id stage
@@ -71,6 +72,12 @@ module pipeLineCPU(
     output [31:0]PC_out,
     output [31:0]Data_out
 );
+    
+    wire [31:0] id_pc;
+    wire [31:0] ex_pc;
+    wire [31:0] mem_pc;
+    wire [31:0] wb_pc;
+    
 
     wire [31:0] nextPc;
     wire [31:0] if_pc_4;
@@ -118,6 +125,7 @@ module pipeLineCPU(
     assign debug_wb_instruction[31:0]  = wb_instruction[31:0]; 
     assign debug_mem_instruction[31:0] = mem_instruction[31:0];
     assign debug_ex_instruction[31:0]  = ex_instruction[31:0];
+    assign debug_ex_pc[31:0] = ex_pc[31:0];
     assign debug_nextPc[31:0] = nextPc[31:0];
     //id stage  
     wire [4:0] debug_id_registerWriteAddress;
@@ -149,11 +157,11 @@ module pipeLineCPU(
 		case (debug_addr[4:0])
 			0: debug_data_signal <= PC_out[31:0];
 			1: debug_data_signal <= instruction_in[31:0];
-			2: debug_data_signal <= 0;
+			2: debug_data_signal <= id_pc[31:0];
 			3: debug_data_signal <= id_instruction[31:0];
-			4: debug_data_signal <= 0;
+			4: debug_data_signal <= ex_pc[31:0];
 			5: debug_data_signal <= ex_instruction[31:0];
-			6: debug_data_signal <= 0;
+			6: debug_data_signal <= mem_pc[31:0];
 			7: debug_data_signal <= mem_instruction[31:0];
 			8: debug_data_signal <= {27'b0, addr_rs};
 			//9: debug_data_signal <= data_rs;
@@ -213,8 +221,10 @@ module pipeLineCPU(
         .id_shouldJumpOrBranch(id_shouldJumpOrBranch),
         .if_pc_4(if_pc_4[31:0]), 
         .if_instruction(instruction_in[31:0]), 
+        .if_pc(PC_out[31:0]),
         .id_pc_4(id_pc_4[31:0]), 
         .id_instruction(id_instruction[31:0]),
+        .id_pc(id_pc[31:0]),
         //cp0 releative
         .exceptClear(exceptClear)
     );
@@ -249,6 +259,8 @@ module pipeLineCPU(
         .rst(rst), 
         .pc_4(id_pc_4[31:0]), 
         .instruction(id_instruction[31:0]), 
+        .id_pc(id_pc[31:0]),
+        .ex_pc(ex_pc[31:0]),
         .wb_RegWrite(wb_ifWriteRegsFile), 
         .wb_registerWriteAddress(wb_registerWriteAddress[4:0]), 
         .wb_writeRegData(wb_writeRegData[31:0]), 
@@ -299,6 +311,7 @@ module pipeLineCPU(
         .rst(rst), 
         .cpu_en(cpu_en),
         .id_instruction(id_instruction[31:0]),
+        .id_pc(id_pc[31:0]),
         .id_shouldStall(shouldStall),
         .id_shiftAmount(id_shiftAmount[31:0]), 
         .id_immediate(id_immediate[31:0]), 
@@ -316,6 +329,7 @@ module pipeLineCPU(
         .id_swSignalAndLastRtEqualCurrentRt(id_swSignalAndLastRtEqualCurrentRt),
         .id_undefined(id_undefined),
         .ex_instruction(ex_instruction[31:0]),
+        .ex_pc(ex_pc[31:0]),
         .ex_shiftAmount(ex_shiftAmount[31:0]), 
         .ex_immediate(ex_immediate[31:0]), 
         .ex_registerRsOrPc_4(ex_registerRsOrPc_4[31:0]), 
@@ -364,6 +378,7 @@ module pipeLineCPU(
         .rst(rst), 
         .cpu_en(cpu_en),
         .ex_instruction(ex_instruction[31:0]),
+        .ex_pc(ex_pc[31:0]),
         .ex_ifWriteRegsFile(ex_ifWriteRegsFile), 
         .ex_ifWriteMem(ex_ifWriteMem), 
         .ex_memOutOrAluOutWriteBackToRegFile(ex_memOutOrAluOutWriteBackToRegFile), 
@@ -371,6 +386,7 @@ module pipeLineCPU(
         .ex_aluOutput(ex_aluOutput[31:0]), 
         .ex_writeDataToDataRAM(ex_writeDataToDataRAM[31:0]), 
         .mem_instruction(mem_instruction[31:0]),
+        .mem_pc(mem_pc[31:0]),
         .mem_ifWriteRegsFile(mem_ifWriteRegsFile), 
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile), 
         .mem_ifWriteMem(mem_ifWriteMem), 
@@ -384,12 +400,14 @@ module pipeLineCPU(
         .rst(rst), 
         .cpu_en(cpu_en),
         .mem_instruction(mem_instruction[31:0]),
+        .mem_pc(mem_pc[31:0]),
         .mem_ifWriteRegsFile(mem_ifWriteRegsFile), 
         .mem_memOutOrAluOutWriteBackToRegFile(mem_memOutOrAluOutWriteBackToRegFile), 
         .mem_registerWriteAddress(mem_registerWriteAddress[4:0]), 
         .mem_memoryData(Data_in[31:0]),  // mem_data out
         .mem_aluOutput(mem_aluOutput[31:0]), 
         .wb_instruction(wb_instruction[31:0]),
+        .wb_pc(wb_pc[31:0]),
         .wb_ifWriteRegsFile(wb_ifWriteRegsFile), 
         .wb_memOutOrAluOutWriteBackToRegFile(wb_memOutOrAluOutWriteBackToRegFile), 
         .wb_registerWriteAddress(wb_registerWriteAddress[4:0]), 

@@ -7,6 +7,7 @@ module IdExRegisters (
     input rst,
     input cpu_en,
     input [31:0]id_instruction,
+    input [31:0]id_pc,
     input id_shouldStall,
     input [31:0] id_shiftAmount,
     input [31:0] id_immediate,
@@ -24,6 +25,7 @@ module IdExRegisters (
     input id_swSignalAndLastRtEqualCurrentRt,
     input id_undefined, // cp0 use
     output reg [31:0] ex_instruction = 0,
+    output reg [31:0] ex_pc = 0,
     output reg [31:0] ex_shiftAmount = 0,
     output reg [31:0] ex_immediate = 0,
     output reg [31:0] ex_registerRsOrPc_4 = 0,
@@ -44,6 +46,7 @@ module IdExRegisters (
         if(cpu_en) begin
             if(rst || id_shouldStall || exceptClear || eret_clearSignal) begin
                 ex_instruction <= 0;
+                ex_pc <= 0;
                 ex_shiftAmount <=0 ;
                 ex_immediate <= 0;
                 ex_registerRsOrPc_4 <= 0;
@@ -61,6 +64,7 @@ module IdExRegisters (
                 ex_undefined <= 0;
             end else begin
                 ex_instruction <= id_instruction;
+                ex_pc <= id_pc;
                 ex_shiftAmount <= id_shiftAmount;
                 ex_immediate <= id_immediate; 
                 ex_registerRsOrPc_4 <= id_registerRsOrPc_4;
@@ -79,6 +83,7 @@ module IdExRegisters (
             end
         end else begin
             ex_instruction <= ex_instruction;
+            ex_pc <= ex_pc;
             ex_shiftAmount <= ex_shiftAmount;
             ex_immediate <= ex_immediate; 
             ex_registerRsOrPc_4 <= ex_registerRsOrPc_4;

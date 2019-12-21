@@ -45,13 +45,15 @@ module cp0 (
 	input wire rst,  // synchronous reset
 	input wire [2:0]cause,            // internal exception input
 	input wire [2:0]interruptSignal,  // external interrupt input
-	input wire [31:0] except_ret_addr,  // target instruction address to store when interrupt occurred
+	//input 
+    input wire [31:0] ex_pc,
+    input wire [31:0] id_pc,
 	output reg epc_ctrl,  // force jump enable signal when interrupt authorised or ERET occurred
 	output reg [31:0] jumpAddressExcept,  // target instruction address to jump to
     output reg exceptClear,
     output reg eret_clearSignal
 	);
-
+    //wire [31:0] except_ret_addr,  // target instruction address to store when interrupt occurred
     wire [31:0] status = cpr[`STATUS_RIGSTER];
     integer i;
     reg [32:0] cpr [0:31];
@@ -89,7 +91,7 @@ module cp0 (
                 exception <= 1;
 
                 epc_ctrl <= 1;
-                cpr[`EPC_RIGSTER] <= except_ret_addr + 4; // if exception. the next instruction is the return address, so we need "+4"
+                cpr[`EPC_RIGSTER] <= ex_pc[31:0] + 4; // if exception. the next instruction is the return address, so we need "+4"
                 jumpAddressExcept <= cpr[`EHB_RIGSTER];
                 mipsRing <= 4;
                 previousRing <= 0;
@@ -105,8 +107,9 @@ module cp0 (
             //deal with interrupt
             if(interruptSignal > mipsRing && status[15:8] == 8'hff) begin //interruptSignal = 0,1,2,3  mipsRing = 0,1,2,3,4
                 epc_ctrl <= 1;
-
-                cpr[`EPC_RIGSTER] <= except_ret_addr + 4;    // if interrupt
+                
+                cpr[`EPC_RIGSTER] <= id_pc[31:0] ;    // if interrupt,start from ex_instruciont's pc
+                
                 jumpAddressExcept <= cpr[`EHB_RIGSTER];
                 ppriviousRing <= previousRing;
                 previousRing <= mipsRing;

@@ -6,6 +6,7 @@ module ExMemRegisters (
     input rst,
     input cpu_en,
     input [31:0] ex_instruction,
+    input [31:0] ex_pc,
     input ex_ifWriteRegsFile,
     input ex_ifWriteMem,
     input ex_memOutOrAluOutWriteBackToRegFile,
@@ -14,6 +15,7 @@ module ExMemRegisters (
     input [31:0] ex_writeDataToDataRAM,
 
     output reg [31:0] mem_instruction = 0,
+    output reg [31:0] mem_pc = 0,
     output reg mem_ifWriteRegsFile = 0, 
     output reg mem_memOutOrAluOutWriteBackToRegFile = 0,
     output reg mem_ifWriteMem = 0,
@@ -34,6 +36,7 @@ module ExMemRegisters (
 			mem_writeDataToDataRAM <= 0;
 			mem_registerWriteAddress <= 0;
             mem_instruction <= 0;
+            mem_pc <= 0;
 		end else begin
             if(cpu_en) begin
                 mem_ifWriteMem <= ex_ifWriteMem & cpu_en;
@@ -44,6 +47,7 @@ module ExMemRegisters (
                 mem_writeDataToDataRAM <= ex_writeDataToDataRAM;
                 mem_registerWriteAddress <= ex_registerWriteAddress;
                 mem_instruction <= ex_instruction;
+                mem_pc <= ex_pc;
                 if(exceptClear) begin
                     mem_ifWriteMem <= 0;
                     mem_ifWriteRegsFile <= 0;
@@ -53,6 +57,7 @@ module ExMemRegisters (
                     mem_writeDataToDataRAM <= 0;
                     mem_registerWriteAddress <= 0;
                     mem_instruction <= 0;
+                    mem_pc <= 0;
                 end
             end
 
@@ -65,6 +70,7 @@ module ExMemRegisters (
                 mem_writeDataToDataRAM <= mem_writeDataToDataRAM;
                 mem_registerWriteAddress <= mem_registerWriteAddress;
                 mem_instruction<= mem_instruction;
+                mem_pc <= mem_pc;
             end
 
 		end
