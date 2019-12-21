@@ -105,25 +105,30 @@ module cp0 (
             end               
             
             //deal with interrupt
-            if(interruptSignal > mipsRing && status[15:8] == 8'hff) begin //interruptSignal = 0,1,2,3  mipsRing = 0,1,2,3,4
-                epc_ctrl <= 1;
+            if(cpu_en) begin
+
+                if(interruptSignal > mipsRing && status[15:8] == 8'hff) begin //interruptSignal = 0,1,2,3  mipsRing = 0,1,2,3,4
+                    epc_ctrl <= 1;
+                    
+                    cpr[`EPC_RIGSTER] <= id_pc[31:0] ;    // if interrupt,start from id_instruciont's pc , because current id_pc address is the next clock's ex_pc
+                    
+                    jumpAddressExcept <= cpr[`EHB_RIGSTER];
+                    ppriviousRing <= previousRing;
+                    previousRing <= mipsRing;
+                    mipsRing <= interruptSignal;
+                    interrupt<= 1;
                 
-                cpr[`EPC_RIGSTER] <= id_pc[31:0] ;    // if interrupt,start from ex_instruciont's pc
-                
-                jumpAddressExcept <= cpr[`EHB_RIGSTER];
-                ppriviousRing <= previousRing;
-                previousRing <= mipsRing;
-                mipsRing <= interruptSignal;
-                interrupt<= 1;
-              
-            end 
-            else begin
-                if(exception == 0 && cpu_en) begin
-                    interrupt <= 0;
-                    epc_ctrl<=0;
-                    eret_clearSignal <= 0;
-                end
-            end       
+                end 
+                else begin
+                    if(exception == 0) begin
+                        interrupt <= 0;
+                        epc_ctrl<=0;
+                        eret_clearSignal <= 0;
+                    end
+                end 
+
+            end
+                  
 
             //excute the cp0 instruction
             if(cp_oper == `OP_mtc) begin
