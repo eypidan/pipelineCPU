@@ -49,12 +49,14 @@
 `define FUNC_XOR 38
 `define FUNC_NOR 39
 `define FUNC_SLT 42
+`define FUNC_SLTU 43
 `define FUNC_SLL 0
 `define FUNC_SLLV 4
 `define FUNC_SRLV 6
 `define FUNC_SRL 2 
 `define FUNC_SRA 3
 `define FUNC_JR 8
+
 
 
 module pipeLineCPU_ctrl(
@@ -127,9 +129,14 @@ module pipeLineCPU_ctrl(
         : func == `FUNC_AND ? `ALU_AND
         : func == `FUNC_OR ? `ALU_OR
         : func == `FUNC_XOR ? `ALU_XOR
+        : func == `FUNC_NOR ? `ALU_NOR
         : func == `FUNC_SLT ? `ALU_SLT
+        : func == `FUNC_SLTU ? `ALU_SLTIU
         : func == `FUNC_SLL ? `ALU_SLL
         : func == `FUNC_SRL ? `ALU_SRL
+        : func == `FUNC_SLLV ?`ALU_SLL
+        : func == `FUNC_SRA ? `ALU_SRA
+        : func == `FUNC_SRLV ? `ALU_SRL
 		  : `ALU_NONE
         )
 		  : OPcode == `CODE_ADDI ? `ALU_ADD
@@ -139,10 +146,13 @@ module pipeLineCPU_ctrl(
         : OPcode == `CODE_BEQ ? `ALU_SUB
         : OPcode == `CODE_BNE ? `ALU_SUB
         : OPcode == `CODE_LW ? `ALU_ADD
+        : OPcode == `CODE_LB ? `ALU_ADD
+        : OPcode == `CODE_LBU ? `ALU_ADD
         : OPcode == `CODE_SW ? `ALU_ADD
         : OPcode == `CODE_LUI ? `ALU_LUI  
         : OPcode == `CODE_SLTI ? `ALU_SLT
-        : OPcode == `CODE_SLTIU ? `ALU_SLTIU
+        : OPcode == `CODE_SLTIU ? `ALU_SLTIU    
+        : OPcode == `CODE_XORI ? `ALU_XOR
         : `ALU_NONE;
 
     //determine imm'sextention
@@ -166,6 +176,7 @@ module pipeLineCPU_ctrl(
         || OPcode == `CODE_LB
         || OPcode == `CODE_SW
         || OPcode == `CODE_SLTI
+        || OPcode == `CODE_SLTIU
         ) && !jal;
 
     //determine in WB stage write to rt or rd
@@ -179,7 +190,8 @@ module pipeLineCPU_ctrl(
         || OPcode == `CODE_LB
         || OPcode == `CODE_LBU
         || OPcode == `CODE_LUI
-        || OPcode == `CODE_SLTI;
+        || OPcode == `CODE_SLTI
+        || OPcode == `CODE_SLTIU;
 
     //determine if need to write Register File
     assign ifWriteRegsFile = ((isRType && (
@@ -192,6 +204,7 @@ module pipeLineCPU_ctrl(
 				|| func == `FUNC_XOR
 				|| func == `FUNC_NOR
 				|| func == `FUNC_SLT
+                || func == `FUNC_SLTU
 				|| func == `FUNC_SLL
 				|| func == `FUNC_SRL
 				|| func == `FUNC_SRA
