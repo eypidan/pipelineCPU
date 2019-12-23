@@ -1,21 +1,22 @@
 `timescale 1ns / 1ps
 `define DEBUG
 //ALU
-`define ALU_ADD  4'b0000  //0
-`define ALU_ADDU 4'b0001
-`define ALU_SUB  4'b0010
-`define ALU_SUBU 4'b0011  //3
-`define ALU_AND  4'b0100
-`define ALU_OR   4'b0101
-`define ALU_XOR  4'b0110
-`define ALU_NOR  4'b0111
-`define ALU_SLL  4'b1000
-`define ALU_SRL  4'b1001
-`define ALU_SRA  4'b1010
+`define ALU_ADD  0  //0
+`define ALU_ADDU 1
+`define ALU_SUB  2
+`define ALU_SUBU  3 //3
+`define ALU_AND  4
+`define ALU_OR   5
+`define ALU_XOR  6
+`define ALU_NOR  7
+`define ALU_SLL  8
+`define ALU_SRL  9
+`define ALU_SRA  10
 `define ALU_LUI  11
-`define ALU_SLTI 12      //12
+`define ALU_SLTIU 12      //12
 `define ALU_SLT  13      //12
-`define ALU_NONE 666
+`define ALU_MUL 14
+`define ALU_NONE 15
 
 //  ==== OPcode ====
 `define CODE_J 2
@@ -33,6 +34,10 @@
 `define CODE_SLTI 10
 `define CODE_SW 43
 `define CODE_XORI 14
+`define CODE_LB 32
+`define CODE_LBU 36
+`define CODE_SLTI 10
+`define CODE_SLTIU 10
 //  ==== OPcode ====
 
 //R function
@@ -46,6 +51,8 @@
 `define FUNC_NOR 39
 `define FUNC_SLT 42
 `define FUNC_SLL 0
+`define FUNC_SLLV 4
+`define FUNC_SRLV 6
 `define FUNC_SRL 2 
 `define FUNC_SRA 3
 `define FUNC_JR 8
@@ -134,7 +141,7 @@ module pipeLineCPU_ctrl(
         : OPcode == `CODE_LW ? `ALU_ADD
         : OPcode == `CODE_SW ? `ALU_ADD
         : OPcode == `CODE_LUI ? `ALU_LUI  // ????
-        : OPcode == `CODE_SLTI ? `ALU_SLTI
+        : OPcode == `CODE_SLTI ? `ALU_SLT
         : `ALU_NONE;
 
     //determine imm'sextention
