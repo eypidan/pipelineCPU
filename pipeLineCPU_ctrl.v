@@ -36,8 +36,7 @@
 `define CODE_XORI 14
 `define CODE_LB 32
 `define CODE_LBU 36
-`define CODE_SLTI 10
-`define CODE_SLTIU 10
+`define CODE_SLTIU 11
 //  ==== OPcode ====
 
 //R function
@@ -135,13 +134,15 @@ module pipeLineCPU_ctrl(
         )
 		  : OPcode == `CODE_ADDI ? `ALU_ADD
         : OPcode == `CODE_ANDI ? `ALU_AND
+        : OPcode == `CODE_ADDIU ? `ALU_ADDU
         : OPcode == `CODE_ORI ? `ALU_OR
         : OPcode == `CODE_BEQ ? `ALU_SUB
         : OPcode == `CODE_BNE ? `ALU_SUB
         : OPcode == `CODE_LW ? `ALU_ADD
         : OPcode == `CODE_SW ? `ALU_ADD
-        : OPcode == `CODE_LUI ? `ALU_LUI  // ????
+        : OPcode == `CODE_LUI ? `ALU_LUI  
         : OPcode == `CODE_SLTI ? `ALU_SLT
+        : OPcode == `CODE_SLTIU ? `ALU_SLTIU
         : `ALU_NONE;
 
     //determine imm'sextention
@@ -156,10 +157,13 @@ module pipeLineCPU_ctrl(
     assign aluInput_B_UseRtOrImmeidate = (
         OPcode == `CODE_ADDI
         || OPcode == `CODE_ANDI
+        || OPcode == `CODE_ADDIU
         || OPcode == `CODE_ORI
         || OPcode == `CODE_XORI
         || OPcode == `CODE_LUI
         || OPcode == `CODE_LW
+        || OPcode == `CODE_LBU
+        || OPcode == `CODE_LB
         || OPcode == `CODE_SW
         || OPcode == `CODE_SLTI
         ) && !jal;
@@ -168,9 +172,12 @@ module pipeLineCPU_ctrl(
     assign writeToRtOrRd =  // while this signal = 1, write to rt
         OPcode == `CODE_ADDI 
         || OPcode == `CODE_XORI
+        || OPcode == `CODE_ADDIU
         || OPcode == `CODE_ANDI
         || OPcode == `CODE_ORI
         || OPcode == `CODE_LW
+        || OPcode == `CODE_LB
+        || OPcode == `CODE_LBU
         || OPcode == `CODE_LUI
         || OPcode == `CODE_SLTI;
 
@@ -188,18 +195,21 @@ module pipeLineCPU_ctrl(
 				|| func == `FUNC_SLL
 				|| func == `FUNC_SRL
 				|| func == `FUNC_SRA
+                || func == `FUNC_SLLV
+				|| func == `FUNC_SRLV
 			)) || jal ||  writeToRtOrRd) && (instruction != 0); //BUG ABOUT SLL $ZERO $ZERO 0x0
 
     //deteremine if write mem
     assign ifWriteMem = OPcode == `CODE_SW;
 
     //determine use LW data or Alu result to write back to REG File
-    assign memOutOrAluOutWriteBackToRegFile = OPcode == `CODE_LW;
+    assign memOutOrAluOutWriteBackToRegFile = (OPcode == `CODE_LW)|| (OPcode == `CODE_LB) || (OPcode == `CODE_LBU);
     assign swSignalAndLastRtEqualCurrentRt = OPcode==`CODE_SW &&  rt[4:0] == ex_instruction[20:16];
     //use shamt[10:6] -> [31:0], input ALU input A
     assign whileShiftAluInput_A_UseShamt = isRType && 
         (func == `FUNC_SLL
-        || func == `FUNC_SRL);
+        || func == `FUNC_SRL
+        || func == `FUNC_SRA);
     
 
    
