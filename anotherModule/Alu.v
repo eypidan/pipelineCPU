@@ -1,20 +1,21 @@
 
 `timescale 1ns / 1ps
 //ALU
-`define ALU_ADD  4'b0000  //0
-`define ALU_ADDU 4'b0001
-`define ALU_SUB  4'b0010
-`define ALU_SUBU 4'b0011  //3
-`define ALU_AND  4'b0100
-`define ALU_OR   4'b0101
-`define ALU_XOR  4'b0110
-`define ALU_NOR  4'b0111
-`define ALU_SLL  4'b1000
-`define ALU_SRL  4'b1001
-`define ALU_SRA  4'b1010
+`define ALU_ADD  0  //0
+`define ALU_ADDU 1
+`define ALU_SUB  2
+`define ALU_SUBU  3 //3
+`define ALU_AND  4
+`define ALU_OR   5
+`define ALU_XOR  6
+`define ALU_NOR  7
+`define ALU_SLL  8
+`define ALU_SRL  9
+`define ALU_SRA  10
 `define ALU_LUI  11
 `define ALU_SLTI 12      //12
 `define ALU_SLT  13      //12
+`define ALU_MUL 14
 `define ALU_NONE 666
 
 //  ==== OPcode ====
@@ -78,6 +79,7 @@ module Alu (
             : operation == `ALU_LUI ? {inputB[15:0],16'b0}
             : operation == `ALU_SLTI ? {31'b0,sltResult[0]}
             : operation == `ALU_SLT ? {31'b0,sltResult[0]}
+            : operation == `ALU_MUL ? inputA * inputB 
 			: 32'b0;
 endmodule
 
